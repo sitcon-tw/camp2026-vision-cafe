@@ -4,8 +4,8 @@ import type { ReactNode } from "react"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Vision Cafe 講者志願",
-  description: "CAMP 2026 Vision Cafe 學生端講者志願選擇。",
+  title: "視界咖啡館講者志願",
+  description: "SITCON Camp 2026 視界咖啡館講者志願選擇。",
 }
 
 type RootLayoutProps = {
