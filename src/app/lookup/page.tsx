@@ -3,6 +3,7 @@
 import { UsersIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 
+import { AppPageShell } from "@/shared/ui/app-page-shell"
 import { Badge } from "@/shared/ui/badge"
 import {
   Card,
@@ -11,10 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/ui/card"
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/shared/ui/native-select"
+import { NativeSelect, NativeSelectOption } from "@/shared/ui/native-select"
 
 import {
   getTeamAssignmentNames,
@@ -28,9 +26,7 @@ import { getSpeakerCandidateByName } from "../select/speaker-data"
 export default function LookupPage() {
   const fallbackTeam = getTeamAssignments()[0]
   const teamNames = getTeamAssignmentNames()
-  const [selectedTeamName, setSelectedTeamName] = useState(
-    teamNames[0] ?? "",
-  )
+  const [selectedTeamName, setSelectedTeamName] = useState(teamNames[0] ?? "")
 
   const selectedTeam = useMemo(
     () => getTeamAssignmentsByName(selectedTeamName) ?? fallbackTeam,
@@ -38,43 +34,41 @@ export default function LookupPage() {
   )
 
   return (
-    <main className="bg-background text-foreground min-h-dvh">
-      <section className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-5 px-4 py-5">
-        <header className="flex flex-col gap-2 pt-1">
-          <p className="text-muted-foreground text-sm leading-6">視界咖啡館</p>
-          <h1 className="text-3xl leading-tight font-black tracking-tight">
-            分配講者查詢
-          </h1>
-        </header>
+    <AppPageShell>
+      <header className="flex flex-col gap-2 pt-1">
+        <p className="text-muted-foreground text-sm leading-6">視界咖啡館</p>
+        <h1 className="text-3xl leading-tight font-black tracking-tight">
+          分配講者查詢
+        </h1>
+      </header>
 
-        <Card>
-          <CardHeader className="gap-3">
-            <CardTitle className="text-2xl font-black tracking-tight">
-              選擇組別
-            </CardTitle>
-            <CardDescription className="text-base leading-7">
-              每次只顯示一組的講者分配結果。
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <NativeSelect
-              value={selectedTeam?.teamName ?? ""}
-              aria-label="選擇組別"
-              className="w-full"
-              onChange={(event) => setSelectedTeamName(event.target.value)}
-            >
-              {teamNames.map((teamName) => (
-                <NativeSelectOption key={teamName} value={teamName}>
-                  {teamName}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </CardContent>
-        </Card>
+      <Card>
+        <CardHeader className="gap-3">
+          <CardTitle className="text-2xl font-black tracking-tight">
+            選擇組別
+          </CardTitle>
+          <CardDescription className="text-base leading-7">
+            每次只顯示一組的講者分配結果。
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <NativeSelect
+            value={selectedTeam?.teamName ?? ""}
+            aria-label="選擇組別"
+            className="w-full"
+            onChange={(event) => setSelectedTeamName(event.target.value)}
+          >
+            {teamNames.map((teamName) => (
+              <NativeSelectOption key={teamName} value={teamName}>
+                {teamName}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        </CardContent>
+      </Card>
 
-        {selectedTeam ? <TeamAssignmentList team={selectedTeam} /> : null}
-      </section>
-    </main>
+      {selectedTeam ? <TeamAssignmentList team={selectedTeam} /> : null}
+    </AppPageShell>
   )
 }
 

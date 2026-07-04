@@ -10,6 +10,7 @@ import {
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert"
+import { AppPageShell } from "@/shared/ui/app-page-shell"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar"
 import { Badge } from "@/shared/ui/badge"
 import { Button } from "@/shared/ui/button"
@@ -72,19 +73,17 @@ export default function SelectPage() {
   }
 
   return (
-    <main className="bg-background text-foreground min-h-dvh">
-      <section className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-5 px-4 py-5">
-        <StudentHeader />
-        <SpeakerIntroList speakers={speakers} />
+    <AppPageShell>
+      <StudentHeader />
+      <SpeakerIntroList speakers={speakers} />
 
-        <PreferenceDialog
-          speakers={orderedSpeakers}
-          submitted={submitted}
-          onSubmit={() => setSubmitted(true)}
-          onUpdateOrder={updateOrder}
-        />
-      </section>
-    </main>
+      <PreferenceDialog
+        speakers={orderedSpeakers}
+        submitted={submitted}
+        onSubmit={() => setSubmitted(true)}
+        onUpdateOrder={updateOrder}
+      />
+    </AppPageShell>
   )
 }
 
