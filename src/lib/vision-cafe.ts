@@ -1,6 +1,11 @@
 export type SpeakerAssignment = {
+  sessionIndex: number | null
+  sessionLabel: string | null
+  status: SpeakerAssignmentStatus
+  studentId: string
   studentName: string
-  speakerName: string
+  speakerName: string | null
+  teamName: string
 }
 
 export type AdminFlowControls = {
@@ -17,23 +22,46 @@ export type StudentSpeakerPreference = {
 }
 
 export type PlannedSpeakerAssignment = SpeakerAssignment & {
-  studentId: string
-  teamName: string
   preferenceRank: number | null
+  priorityOrder: number
+  submittedAt: string | null
+  unassignedReason?: string
 }
 
+export type SpeakerAssignmentStatus = "assigned" | "unassigned"
+
 export type SpeakerAssignmentPlan = {
-  generatedAt: string
   assignments: PlannedSpeakerAssignment[]
+  assignedCount: number
+  generatedAt: string
+  sessionCapacity: number
+  sessionLoads: SpeakerSessionLoad[]
+  sessionsPerSpeaker: number
   speakerLoads: {
     speakerName: string
     count: number
   }[]
+  totalCapacity: number
+  unassignedCount: number
 }
 
-export type TeamAssignments = {
+export type AssignmentGroup<TAssignment> = {
+  assignments: TAssignment[]
   teamName: string
-  assignments: SpeakerAssignment[]
+}
+
+export type TeamAssignments = AssignmentGroup<SpeakerAssignment>
+
+export type SpeakerSessionAssignments<TAssignment = SpeakerAssignment> =
+  SpeakerSessionLoad & {
+    assignments: TAssignment[]
+  }
+
+export type SpeakerSessionLoad = {
+  count: number
+  sessionIndex: number
+  sessionLabel: string
+  speakerName: string
 }
 
 export type Speaker = {
@@ -85,6 +113,9 @@ const speakerCandidates: Speaker[] = [
   },
 ]
 
+export const SPEAKER_SESSION_COUNT = 2
+export const SPEAKER_SESSION_CAPACITY = 12
+
 export function getSpeakerCandidates() {
   return speakerCandidates
 }
@@ -102,39 +133,324 @@ export function getSpeakerCandidateByName(speakerName: string) {
 export function createSpeakerAssignmentPlan(
   preferences: StudentSpeakerPreference[],
   generatedAt = new Date().toISOString(),
+  random = Math.random,
 ): SpeakerAssignmentPlan {
-  const speakerLoads = getSpeakerCandidateNames().map((speakerName) => ({
+  const speakerNames = getSpeakerCandidateNames()
+  const speakerLoads = speakerNames.map((speakerName) => ({
     speakerName,
     count: 0,
   }))
+  const sessionLoads = speakerNames.flatMap((speakerName) =>
+    Array.from({ length: SPEAKER_SESSION_COUNT }, (_, index) => ({
+      count: 0,
+      sessionIndex: index + 1,
+      sessionLabel: createSessionLabel(index + 1),
+      speakerName,
+    })),
+  )
+  const indexedPreferences = preferences.map((preference, index) => ({
+    index,
+    preference,
+  }))
+  const assignmentResults = new Map<number, PlannedSpeakerAssignment>()
+  const prioritizedPreferences = createPrioritizedPreferences(
+    indexedPreferences,
+    random,
+  )
 
-  const assignments = preferences.map((preference) => {
-    const rankedSpeaker = preference.preferenceOrder.find((speakerName) =>
-      speakerLoads.some((load) => load.speakerName === speakerName),
+  for (const [priorityIndex, item] of prioritizedPreferences.entries()) {
+    const preference = item.preference
+    const assignedSession =
+      preference.preferenceOrder.length > 0
+        ? findPreferredAvailableSession(preference.preferenceOrder, sessionLoads)
+        : findRandomAvailableSession(sessionLoads, random)
+
+    if (!assignedSession) {
+      assignmentResults.set(item.index, {
+        preferenceRank: null,
+        priorityOrder: priorityIndex + 1,
+        sessionIndex: null,
+        sessionLabel: null,
+        speakerName: null,
+        status: "unassigned",
+        studentId: preference.studentId,
+        studentName: preference.studentName,
+        submittedAt: preference.submittedAt,
+        teamName: preference.teamName,
+        unassignedReason: "所有講者場次皆已額滿",
+      })
+      continue
+    }
+
+    assignedSession.count += 1
+    const assignedSpeakerLoad = speakerLoads.find(
+      (load) => load.speakerName === assignedSession.speakerName,
     )
-    const lowestLoad = speakerLoads.reduce((lowest, current) =>
-      current.count < lowest.count ? current : lowest,
-    )
-    const assignedLoad =
-      speakerLoads.find((load) => load.speakerName === rankedSpeaker) ??
-      lowestLoad
 
-    assignedLoad.count += 1
+    if (assignedSpeakerLoad) {
+      assignedSpeakerLoad.count += 1
+    }
 
-    return {
+    assignmentResults.set(item.index, {
+      preferenceRank: getPreferenceRank(
+        preference.preferenceOrder,
+        assignedSession.speakerName,
+      ),
+      priorityOrder: priorityIndex + 1,
+      sessionIndex: assignedSession.sessionIndex,
+      sessionLabel: assignedSession.sessionLabel,
+      speakerName: assignedSession.speakerName,
+      status: "assigned",
       studentId: preference.studentId,
       studentName: preference.studentName,
       teamName: preference.teamName,
-      speakerName: assignedLoad.speakerName,
-      preferenceRank: rankedSpeaker
-        ? preference.preferenceOrder.indexOf(assignedLoad.speakerName) + 1
-        : null,
+      submittedAt: preference.submittedAt,
+    })
+  }
+
+  const assignments = indexedPreferences.map((item) => {
+    const assignment = assignmentResults.get(item.index)
+
+    if (!assignment) {
+      throw new Error(`Missing assignment for ${item.preference.studentId}`)
     }
+
+    return assignment
   })
+  const assignedCount = assignments.filter(
+    (assignment) => assignment.status === "assigned",
+  ).length
 
   return {
-    generatedAt,
     assignments,
+    assignedCount,
+    generatedAt,
+    sessionCapacity: SPEAKER_SESSION_CAPACITY,
+    sessionLoads,
+    sessionsPerSpeaker: SPEAKER_SESSION_COUNT,
     speakerLoads,
+    totalCapacity:
+      speakerNames.length * SPEAKER_SESSION_COUNT * SPEAKER_SESSION_CAPACITY,
+    unassignedCount: assignments.length - assignedCount,
   }
+}
+
+export function toSpeakerAssignment(
+  assignment: PlannedSpeakerAssignment,
+): SpeakerAssignment {
+  return {
+    sessionIndex: assignment.sessionIndex ?? null,
+    sessionLabel: assignment.sessionLabel ?? null,
+    speakerName: assignment.speakerName ?? null,
+    status: assignment.status ?? "assigned",
+    studentId: assignment.studentId,
+    studentName: assignment.studentName,
+    teamName: assignment.teamName,
+  }
+}
+
+export function createTeamAssignments(
+  assignments: PlannedSpeakerAssignment[],
+): TeamAssignments[] {
+  return groupAssignmentsByTeam(assignments.map(toSpeakerAssignment))
+}
+
+export function createSpeakerSessionAssignments(
+  assignmentPlan: SpeakerAssignmentPlan,
+): SpeakerSessionAssignments[] {
+  return groupAssignmentsBySession(
+    assignmentPlan.sessionLoads ?? [],
+    assignmentPlan.assignments.map(toSpeakerAssignment),
+  )
+}
+
+export function groupAssignmentsByTeam<
+  TAssignment extends { teamName: string },
+>(assignments: TAssignment[]): AssignmentGroup<TAssignment>[] {
+  const teams = new Map<string, AssignmentGroup<TAssignment>>()
+
+  for (const assignment of assignments) {
+    const team =
+      teams.get(assignment.teamName) ??
+      ({
+        assignments: [],
+        teamName: assignment.teamName,
+      } satisfies AssignmentGroup<TAssignment>)
+
+    team.assignments.push(assignment)
+    teams.set(assignment.teamName, team)
+  }
+
+  return Array.from(teams.values())
+}
+
+export function groupAssignmentsBySession<
+  TAssignment extends {
+    sessionIndex: number | null
+    sessionLabel: string | null
+    speakerName: string | null
+    status: SpeakerAssignmentStatus
+  },
+>(
+  sessionLoads: SpeakerSessionLoad[],
+  assignments: TAssignment[],
+): SpeakerSessionAssignments<TAssignment>[] {
+  const sessions = new Map<string, SpeakerSessionAssignments<TAssignment>>()
+
+  for (const sessionLoad of sessionLoads) {
+    sessions.set(
+      createSessionKey(sessionLoad.speakerName, sessionLoad.sessionIndex),
+      {
+        ...sessionLoad,
+        assignments: [],
+      },
+    )
+  }
+
+  for (const assignment of assignments) {
+    if (
+      assignment.status !== "assigned" ||
+      !assignment.speakerName ||
+      !assignment.sessionIndex
+    ) {
+      continue
+    }
+
+    const sessionKey = createSessionKey(
+      assignment.speakerName,
+      assignment.sessionIndex,
+    )
+    const session =
+      sessions.get(sessionKey) ??
+      ({
+        assignments: [],
+        count: 0,
+        sessionIndex: assignment.sessionIndex,
+        sessionLabel:
+          assignment.sessionLabel ??
+          createSessionLabel(assignment.sessionIndex),
+        speakerName: assignment.speakerName,
+      } satisfies SpeakerSessionAssignments<TAssignment>)
+
+    session.assignments.push(assignment)
+    session.count = Math.max(session.count, session.assignments.length)
+    sessions.set(sessionKey, session)
+  }
+
+  return Array.from(sessions.values())
+}
+
+export function createSessionKey(speakerName: string, sessionIndex: number) {
+  return `${speakerName}:${sessionIndex}`
+}
+
+function findPreferredAvailableSession(
+  preferenceOrder: string[],
+  sessionLoads: SpeakerSessionLoad[],
+) {
+  for (const speakerName of preferenceOrder) {
+    const availableSessions = sessionLoads.filter(
+      (sessionLoad) =>
+        sessionLoad.speakerName === speakerName &&
+        sessionLoad.count < SPEAKER_SESSION_CAPACITY,
+    )
+
+    if (!availableSessions.length) {
+      continue
+    }
+
+    return availableSessions.reduce((lowest, current) => {
+      if (current.count !== lowest.count) {
+        return current.count < lowest.count ? current : lowest
+      }
+
+      return current.sessionIndex < lowest.sessionIndex ? current : lowest
+    })
+  }
+
+  return null
+}
+
+function getPreferenceRank(preferenceOrder: string[], speakerName: string) {
+  const preferenceIndex = preferenceOrder.indexOf(speakerName)
+
+  return preferenceIndex >= 0 ? preferenceIndex + 1 : null
+}
+
+function toSubmittedAtTime(submittedAt: string | null) {
+  if (!submittedAt) {
+    return Number.POSITIVE_INFINITY
+  }
+
+  const submittedAtTime = Date.parse(submittedAt)
+
+  return Number.isNaN(submittedAtTime)
+    ? Number.POSITIVE_INFINITY
+    : submittedAtTime
+}
+
+function createSessionLabel(sessionIndex: number) {
+  return `第 ${sessionIndex} 場`
+}
+
+function createPrioritizedPreferences<
+  TItem extends { index: number; preference: StudentSpeakerPreference },
+>(indexedPreferences: TItem[], random: () => number) {
+  const submittedPreferences: TItem[] = []
+  const unsubmittedPreferences: TItem[] = []
+
+  for (const item of indexedPreferences) {
+    if (Number.isFinite(toSubmittedAtTime(item.preference.submittedAt))) {
+      submittedPreferences.push(item)
+    } else {
+      unsubmittedPreferences.push(item)
+    }
+  }
+
+  submittedPreferences.sort((left, right) => {
+    const leftTime = toSubmittedAtTime(left.preference.submittedAt)
+    const rightTime = toSubmittedAtTime(right.preference.submittedAt)
+
+    if (leftTime !== rightTime) {
+      return leftTime - rightTime
+    }
+
+    return left.index - right.index
+  })
+
+  return [...submittedPreferences, ...shuffle(unsubmittedPreferences, random)]
+}
+
+function findRandomAvailableSession(
+  sessionLoads: SpeakerSessionLoad[],
+  random: () => number,
+) {
+  const availableSessions = sessionLoads.filter(
+    (sessionLoad) => sessionLoad.count < SPEAKER_SESSION_CAPACITY,
+  )
+
+  if (!availableSessions.length) {
+    return null
+  }
+
+  const randomIndex = Math.min(
+    availableSessions.length - 1,
+    Math.floor(random() * availableSessions.length),
+  )
+
+  return availableSessions[randomIndex]
+}
+
+function shuffle<TItem>(items: TItem[], random: () => number) {
+  const shuffledItems = [...items]
+
+  for (let index = shuffledItems.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.min(index, Math.floor(random() * (index + 1)))
+    const currentItem = shuffledItems[index]
+
+    shuffledItems[index] = shuffledItems[randomIndex]
+    shuffledItems[randomIndex] = currentItem
+  }
+
+  return shuffledItems
 }
