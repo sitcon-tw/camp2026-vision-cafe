@@ -7,7 +7,9 @@ import {
   CircleAlertIcon,
   ExternalLinkIcon,
   GripVerticalIcon,
+  LogOutIcon,
 } from "lucide-react"
+import { signOut } from "next-auth/react"
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert"
@@ -115,14 +117,27 @@ export function SelectClient({ initialData }: SelectClientProps) {
 
   return (
     <AppPageShell title="講者志願選填">
-      <Alert>
-        <CheckIcon aria-hidden="true" />
-        <AlertTitle>
+      <Alert className="grid-cols-[auto_1fr_auto] items-center gap-x-3 has-[>svg]:grid-cols-[auto_1fr_auto] [&>svg]:translate-y-0">
+        <CheckIcon
+          aria-hidden="true"
+          className="row-span-2 row-start-1 self-center"
+        />
+        <AlertTitle className="col-start-2 row-start-1">
           {initialData.student.studentName} / {initialData.student.teamName}
         </AlertTitle>
-        <AlertDescription>
+        <AlertDescription className="col-start-2 row-start-2">
           <p>已使用 GitHub 帳號 {initialData.student.githubUsername} 登入。</p>
         </AlertDescription>
+        <Button
+          type="button"
+          variant="outline"
+            size="sm"
+            className="col-start-3 row-span-2 row-start-1 self-center shadow-none"
+          onClick={() => void signOut({ callbackUrl: "/select" })}
+        >
+          <LogOutIcon aria-hidden="true" />
+          登出
+        </Button>
       </Alert>
 
       {!initialData.flowControls.speakerPreferenceSelectionOpen ? (

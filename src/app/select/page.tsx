@@ -1,7 +1,6 @@
-import { redirect } from "next/navigation"
-
 import { getAppSession, getStudentFromSession } from "@/shared/server/auth"
 import { getStudentSelectionPayload } from "@/shared/server/repositories"
+import { StudentLoginGate } from "@/shared/ui/student-login-gate"
 
 import { SelectClient } from "./select-client"
 
@@ -12,9 +11,7 @@ export default async function SelectPage() {
   const student = getStudentFromSession(session)
 
   if (!student) {
-    redirect(
-      `/api/auth/signin/github?callbackUrl=${encodeURIComponent("/select")}`,
-    )
+    return <StudentLoginGate callbackUrl="/select" />
   }
 
   return (
