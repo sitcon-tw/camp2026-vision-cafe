@@ -18,7 +18,7 @@ export function AdminSectionPage({ children, title }: AdminSectionPageProps) {
   return (
     <SidebarProvider>
       <AdminNavigation />
-      <SidebarInset>
+      <SidebarInset className="min-w-0 overflow-hidden">
         <AppPageShell
           title={title}
           label="視界咖啡館 Admin"

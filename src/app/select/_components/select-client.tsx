@@ -131,8 +131,8 @@ export function SelectClient({ initialData }: SelectClientProps) {
         <Button
           type="button"
           variant="outline"
-            size="sm"
-            className="col-start-3 row-span-2 row-start-1 self-center shadow-none"
+          size="sm"
+          className="col-start-3 row-span-2 row-start-1 self-center shadow-none"
           onClick={() => void signOut({ callbackUrl: "/select" })}
         >
           <LogOutIcon aria-hidden="true" />
@@ -496,7 +496,7 @@ function SpeakerRankingPanel({
           排講者志願
         </DialogTitle>
         <DialogDescription className="text-base leading-7">
-          按住右側把手拖曳排序，也可以用上下按鈕微調。
+          按住右側把手拖曳排序，也可以用上下按鈕微調。越早送出，越容易分配到前面的志願。
         </DialogDescription>
       </DialogHeader>
 
