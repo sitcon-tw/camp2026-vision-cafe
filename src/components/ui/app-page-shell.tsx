@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -38,7 +39,10 @@ export function AppPageShell({
       size="sm"
       className="-ml-2 w-fit justify-start shadow-none"
     >
-      <Link href={backHref}>{"<-"} {backLabel}</Link>
+      <Link href={backHref} className="inline-flex items-center gap-1">
+        <ArrowLeft className="size-4" />
+        {backLabel}
+      </Link>
     </Button>
   ) : null
 

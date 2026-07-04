@@ -21,7 +21,12 @@ export function StudentLoginGate({
   callbackUrl = "/select",
 }: StudentLoginGateProps) {
   return (
-    <AppPageShell title="學員登入" contentPlacement="center">
+    <AppPageShell
+      title="學員登入"
+      contentPlacement="center"
+      backHref="/"
+      backLabel="回到首頁"
+    >
       <Card>
         <CardHeader className="gap-3">
           <CardTitle className="text-2xl font-black tracking-tight">
