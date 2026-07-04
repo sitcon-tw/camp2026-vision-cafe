@@ -1,12 +1,11 @@
 "use client"
 
 import { PencilIcon, SearchIcon, SlidersHorizontalIcon } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
+import type { AdminPreferencesPayload } from "@/shared/data/vision-cafe-api"
 import {
   getSpeakerCandidateNames,
-  getStudentSpeakerPreferences,
-  updateStudentSpeakerPreference,
   type StudentSpeakerPreference,
 } from "@/shared/data/vision-cafe"
 import { Badge } from "@/shared/ui/badge"
@@ -32,6 +31,7 @@ import {
 import { Input } from "@/shared/ui/input"
 import { Label } from "@/shared/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/shared/ui/native-select"
+import { Spinner } from "@/shared/ui/spinner"
 import {
   Table,
   TableBody,
@@ -49,8 +49,10 @@ import {
 } from "../_components/admin-format"
 
 export default function AdminPreferencesPage() {
-  const [preferences, setPreferences] = useState(getStudentSpeakerPreferences)
+  const [preferences, setPreferences] = useState<StudentSpeakerPreference[]>([])
   const [query, setQuery] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
   const speakerNames = getSpeakerCandidateNames()
   const normalizedQuery = query.trim().toLowerCase()
   const filteredPreferences = useMemo(
@@ -70,13 +72,51 @@ export default function AdminPreferencesPage() {
     [normalizedQuery, preferences],
   )
 
-  function updatePreference(
+  useEffect(() => {
+    async function loadPreferences() {
+      const response = await fetch("/api/admin/preferences")
+
+      if (!response.ok) {
+        setError("無法載入學員志願。")
+        setLoading(false)
+        return
+      }
+
+      const payload = (await response.json()) as AdminPreferencesPayload
+
+      setPreferences(payload.preferences)
+      setLoading(false)
+    }
+
+    void loadPreferences()
+  }, [])
+
+  async function updatePreference(
     studentId: string,
     updates: Pick<StudentSpeakerPreference, "preferenceOrder" | "submittedAt">,
   ) {
+    const currentPreferences = preferences
+
     setPreferences((current) =>
-      updateStudentSpeakerPreference(current, studentId, updates),
+      updateLocalPreference(current, studentId, updates),
     )
+    setError(null)
+
+    const response = await fetch(
+      `/api/admin/preferences/${encodeURIComponent(studentId)}`,
+      {
+        body: JSON.stringify(updates),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "PUT",
+      },
+    )
+
+    if (!response.ok) {
+      setPreferences(currentPreferences)
+      setError("志願更新失敗。")
+    }
   }
 
   return (
@@ -115,6 +155,13 @@ export default function AdminPreferencesPage() {
             />
           </div>
 
+          {loading ? (
+            <div className="text-muted-foreground flex items-center gap-2 text-sm font-semibold">
+              <Spinner aria-hidden="true" />
+              載入中
+            </div>
+          ) : null}
+
           <div className="min-h-0 overflow-y-auto pr-1">
             <Table>
               <TableHeader className="sticky top-0 z-10">
@@ -131,7 +178,9 @@ export default function AdminPreferencesPage() {
                     key={preference.studentId}
                     preference={preference}
                     speakerNames={speakerNames}
-                    onUpdatePreference={updatePreference}
+                    onUpdatePreference={(studentId, updates) =>
+                      void updatePreference(studentId, updates)
+                    }
                   />
                 ))}
               </TableBody>
@@ -141,6 +190,11 @@ export default function AdminPreferencesPage() {
           {filteredPreferences.length === 0 ? (
             <p className="text-muted-foreground shrink-0 text-center text-sm font-semibold">
               沒有符合搜尋條件的學員。
+            </p>
+          ) : null}
+          {error ? (
+            <p className="text-destructive shrink-0 text-sm font-semibold">
+              {error}
             </p>
           ) : null}
         </CardContent>
@@ -314,5 +368,17 @@ function EditPreferenceDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function updateLocalPreference(
+  preferences: StudentSpeakerPreference[],
+  studentId: string,
+  updates: Pick<StudentSpeakerPreference, "preferenceOrder" | "submittedAt">,
+) {
+  return preferences.map((preference) =>
+    preference.studentId === studentId
+      ? { ...preference, ...updates }
+      : preference,
   )
 }

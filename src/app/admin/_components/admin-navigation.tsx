@@ -92,7 +92,7 @@ export function AdminNavigation() {
                       isActive={active}
                       size="lg"
                       tooltip={item.label}
-                      className="relative font-black before:absolute before:top-1/2 before:left-2 before:h-7 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-sidebar-primary before:opacity-0 before:transition-opacity data-[active=true]:before:opacity-100 group-data-[collapsible=icon]:before:hidden"
+                      className="before:bg-sidebar-primary relative font-black before:absolute before:top-1/2 before:left-2 before:h-7 before:w-1 before:-translate-y-1/2 before:rounded-full before:opacity-0 before:transition-opacity group-data-[collapsible=icon]:before:hidden data-[active=true]:before:opacity-100"
                     >
                       <Link
                         href={item.href}

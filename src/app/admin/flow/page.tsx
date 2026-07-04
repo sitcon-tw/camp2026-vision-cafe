@@ -1,12 +1,9 @@
 "use client"
 
 import { CheckCircle2Icon, Settings2Icon, XCircleIcon } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
-import {
-  getAdminFlowControls,
-  type AdminFlowControls,
-} from "@/shared/data/vision-cafe"
+import type { AdminFlowControls } from "@/shared/data/vision-cafe"
 import { Badge } from "@/shared/ui/badge"
 import {
   Card,
@@ -16,15 +13,57 @@ import {
   CardTitle,
 } from "@/shared/ui/card"
 import { Label } from "@/shared/ui/label"
+import { Spinner } from "@/shared/ui/spinner"
 import { Switch } from "@/shared/ui/switch"
 
 import { AdminSectionPage } from "../_components/admin-section-page"
 
 export default function AdminFlowPage() {
-  const [flowControls, setFlowControls] = useState(getAdminFlowControls)
+  const [flowControls, setFlowControls] = useState<AdminFlowControls | null>(
+    null,
+  )
+  const [error, setError] = useState<string | null>(null)
 
-  function updateFlowControl(key: keyof AdminFlowControls, checked: boolean) {
-    setFlowControls((current) => ({ ...current, [key]: checked }))
+  useEffect(() => {
+    async function loadFlowControls() {
+      const response = await fetch("/api/admin/flow-controls")
+
+      if (!response.ok) {
+        setError("無法載入流程控制。")
+        return
+      }
+
+      setFlowControls(await response.json())
+    }
+
+    void loadFlowControls()
+  }, [])
+
+  async function updateFlowControl(
+    key: keyof AdminFlowControls,
+    checked: boolean,
+  ) {
+    if (!flowControls) {
+      return
+    }
+
+    const nextFlowControls = { ...flowControls, [key]: checked }
+
+    setFlowControls(nextFlowControls)
+    setError(null)
+
+    const response = await fetch("/api/admin/flow-controls", {
+      body: JSON.stringify(nextFlowControls),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PUT",
+    })
+
+    if (!response.ok) {
+      setFlowControls(flowControls)
+      setError("流程控制更新失敗。")
+    }
   }
 
   return (
@@ -43,24 +82,39 @@ export default function AdminFlowPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3">
-          <FlowControlSwitch
-            id="speaker-preference-selection-open"
-            title="講者志願選擇"
-            description="開啟後學員可以送出或調整講者志願序。"
-            checked={flowControls.speakerPreferenceSelectionOpen}
-            onCheckedChange={(checked) =>
-              updateFlowControl("speakerPreferenceSelectionOpen", checked)
-            }
-          />
-          <FlowControlSwitch
-            id="assignment-lookup-open"
-            title="查詢界面"
-            description="開啟後學員可以查詢講者分配結果。"
-            checked={flowControls.assignmentLookupOpen}
-            onCheckedChange={(checked) =>
-              updateFlowControl("assignmentLookupOpen", checked)
-            }
-          />
+          {!flowControls ? (
+            <div className="text-muted-foreground flex items-center gap-2 text-sm font-semibold">
+              <Spinner aria-hidden="true" />
+              載入中
+            </div>
+          ) : (
+            <>
+              <FlowControlSwitch
+                id="speaker-preference-selection-open"
+                title="講者志願選擇"
+                description="開啟後學員可以送出或調整講者志願序。"
+                checked={flowControls.speakerPreferenceSelectionOpen}
+                onCheckedChange={(checked) =>
+                  void updateFlowControl(
+                    "speakerPreferenceSelectionOpen",
+                    checked,
+                  )
+                }
+              />
+              <FlowControlSwitch
+                id="assignment-lookup-open"
+                title="查詢界面"
+                description="開啟後學員可以查詢講者分配結果。"
+                checked={flowControls.assignmentLookupOpen}
+                onCheckedChange={(checked) =>
+                  void updateFlowControl("assignmentLookupOpen", checked)
+                }
+              />
+            </>
+          )}
+          {error ? (
+            <p className="text-destructive text-sm font-semibold">{error}</p>
+          ) : null}
         </CardContent>
       </Card>
     </AdminSectionPage>
