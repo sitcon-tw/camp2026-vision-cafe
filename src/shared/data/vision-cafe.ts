@@ -227,7 +227,9 @@ export function updateStudentSpeakerPreference(
   updates: Pick<StudentSpeakerPreference, "preferenceOrder" | "submittedAt">,
 ) {
   return preferences.map((preference) =>
-    preference.studentId === studentId ? { ...preference, ...updates } : preference,
+    preference.studentId === studentId
+      ? { ...preference, ...updates }
+      : preference,
   )
 }
 
