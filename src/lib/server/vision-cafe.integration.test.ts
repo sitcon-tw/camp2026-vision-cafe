@@ -105,6 +105,11 @@ describe("Vision Cafe backend integration", () => {
         (preference) => preference.submittedAt === null,
       ),
     ).toBe(true)
+    expect(
+      initialPreferences.preferences.every(
+        (preference) => preference.preferenceOrder.length === 0,
+      ),
+    ).toBe(true)
 
     for (const [index, student] of rosterStudents.entries()) {
       const preferenceOrder =
@@ -128,6 +133,8 @@ describe("Vision Cafe backend integration", () => {
 
     const dryRun = await postDryRun()
     expect(dryRun.assignmentPlan.assignments).toHaveLength(48)
+    expect(dryRun.assignmentPlan.totalCapacity).toBe(48)
+    expect(dryRun.assignmentPlan.unassignedCount).toBe(0)
     expect(dryRun.assignmentPlan.speakerLoads).toEqual([
       {
         count: 24,
@@ -135,6 +142,32 @@ describe("Vision Cafe backend integration", () => {
       },
       {
         count: 24,
+        speakerName: speakerNames[1],
+      },
+    ])
+    expect(dryRun.assignmentPlan.sessionLoads).toEqual([
+      {
+        count: 12,
+        sessionIndex: 1,
+        sessionLabel: "第 1 場",
+        speakerName: speakerNames[0],
+      },
+      {
+        count: 12,
+        sessionIndex: 2,
+        sessionLabel: "第 2 場",
+        speakerName: speakerNames[0],
+      },
+      {
+        count: 12,
+        sessionIndex: 1,
+        sessionLabel: "第 1 場",
+        speakerName: speakerNames[1],
+      },
+      {
+        count: 12,
+        sessionIndex: 2,
+        sessionLabel: "第 2 場",
         speakerName: speakerNames[1],
       },
     ])
@@ -167,6 +200,20 @@ describe("Vision Cafe backend integration", () => {
     expect(lookupPayload.teams.map((team) => team.assignments.length)).toEqual([
       6, 6, 6, 5, 5, 5, 5, 5, 5,
     ])
+    expect(lookupPayload.sessions).toHaveLength(4)
+    expect(
+      lookupPayload.sessions.map((session) => session.assignments.length),
+    ).toEqual([12, 12, 12, 12])
+    expect(
+      lookupPayload.teams.every((team) =>
+        team.assignments.every(
+          (assignment) =>
+            assignment.status === "assigned" &&
+            assignment.speakerName &&
+            assignment.sessionIndex,
+        ),
+      ),
+    ).toBe(true)
   })
 })
 
@@ -247,10 +294,18 @@ async function postDryRun() {
   return response.json() as Promise<{
     assignmentPlan: {
       assignments: unknown[]
+      sessionLoads: {
+        count: number
+        sessionIndex: number
+        sessionLabel: string
+        speakerName: string
+      }[]
       speakerLoads: {
         count: number
         speakerName: string
       }[]
+      totalCapacity: number
+      unassignedCount: number
     }
   }>
 }
@@ -286,8 +341,19 @@ async function getLookup() {
       }
     | {
         state: "ready"
-        teams: {
+        sessions: {
           assignments: unknown[]
+          count: number
+          sessionIndex: number
+          sessionLabel: string
+          speakerName: string
+        }[]
+        teams: {
+          assignments: {
+            sessionIndex: number | null
+            speakerName: string | null
+            status: "assigned" | "unassigned"
+          }[]
           teamName: string
         }[]
       }

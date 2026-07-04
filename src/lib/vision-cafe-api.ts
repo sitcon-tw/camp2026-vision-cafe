@@ -1,5 +1,6 @@
 import type {
   AdminFlowControls,
+  SpeakerSessionAssignments,
   SpeakerAssignmentPlan,
   StudentSpeakerPreference,
   TeamAssignments,
@@ -28,6 +29,7 @@ export type LookupPayload =
     }
   | {
       generatedAt: string
+      sessions: SpeakerSessionAssignments[]
       state: "ready"
       teams: TeamAssignments[]
     }

@@ -3,12 +3,11 @@ import type { Collection, ObjectId } from "mongodb"
 import type { AuthenticatedStudent } from "@/lib/vision-cafe-api"
 import {
   createSpeakerAssignmentPlan,
-  getSpeakerCandidateNames,
+  createSpeakerSessionAssignments,
+  createTeamAssignments,
   type AdminFlowControls,
-  type PlannedSpeakerAssignment,
   type SpeakerAssignmentPlan,
   type StudentSpeakerPreference,
-  type TeamAssignments,
 } from "@/lib/vision-cafe"
 import { getMongoDatabase } from "@/lib/server/mongodb"
 import { getRosterStudents } from "@/lib/server/roster"
@@ -187,8 +186,9 @@ export async function getLookupPayload() {
 
   return {
     generatedAt: assignmentPlan.generatedAt,
+    sessions: createSpeakerSessionAssignments(assignmentPlan),
     state: "ready" as const,
-    teams: groupAssignmentsByTeam(assignmentPlan.assignments),
+    teams: createTeamAssignments(assignmentPlan.assignments),
   }
 }
 
@@ -196,11 +196,13 @@ function toStudentPreference(
   student: AuthenticatedStudent,
   document?: PreferenceDocument,
 ): StudentSpeakerPreference {
+  const submittedAt = document?.submittedAt ?? null
+
   return {
-    preferenceOrder: document?.preferenceOrder ?? getSpeakerCandidateNames(),
+    preferenceOrder: submittedAt ? (document?.preferenceOrder ?? []) : [],
     studentId: student.studentId,
     studentName: student.studentName,
-    submittedAt: document?.submittedAt ?? null,
+    submittedAt,
     teamName: student.teamName,
   }
 }
@@ -211,29 +213,6 @@ async function getLatestPublishedAssignmentPlan() {
   )
 
   return document
-}
-
-function groupAssignmentsByTeam(
-  assignments: PlannedSpeakerAssignment[],
-): TeamAssignments[] {
-  const teams = new Map<string, TeamAssignments>()
-
-  for (const assignment of assignments) {
-    const team =
-      teams.get(assignment.teamName) ??
-      ({
-        assignments: [],
-        teamName: assignment.teamName,
-      } satisfies TeamAssignments)
-
-    team.assignments.push({
-      speakerName: assignment.speakerName,
-      studentName: assignment.studentName,
-    })
-    teams.set(assignment.teamName, team)
-  }
-
-  return Array.from(teams.values())
 }
 
 async function preferencesCollection(): Promise<
