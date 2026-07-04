@@ -1,0 +1,62 @@
+import * as React from "react"
+import { ChevronDownIcon } from "lucide-react"
+
+import { cn } from "@/shared/utils"
+
+function NativeSelect({
+  className,
+  size = "default",
+  ...props
+}: Omit<React.ComponentProps<"select">, "size"> & { size?: "sm" | "default" }) {
+  return (
+    <div
+      className="group/native-select relative w-fit has-[select:disabled]:opacity-50"
+      data-slot="native-select-wrapper"
+    >
+      <select
+        data-slot="native-select"
+        data-size={size}
+        className={cn(
+          "border-ink bg-card selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground h-10 w-full min-w-0 appearance-none rounded-[0.875rem] border-2 px-3 py-2 pr-9 text-sm font-black shadow-[2px_2px_0_rgba(23,35,58,0.12)] transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed data-[size=sm]:h-9 data-[size=sm]:py-1",
+          "focus-visible:border-ring focus-visible:ring-power/45 focus-visible:ring-[3px]",
+          "aria-invalid:border-destructive aria-invalid:ring-destructive/25",
+          className,
+        )}
+        {...props}
+      />
+      <ChevronDownIcon
+        className="text-muted-foreground pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 opacity-50 select-none"
+        aria-hidden="true"
+        data-slot="native-select-icon"
+      />
+    </div>
+  )
+}
+
+function NativeSelectOption({
+  className,
+  ...props
+}: React.ComponentProps<"option">) {
+  return (
+    <option
+      data-slot="native-select-option"
+      className={cn("bg-[Canvas] text-[CanvasText]", className)}
+      {...props}
+    />
+  )
+}
+
+function NativeSelectOptGroup({
+  className,
+  ...props
+}: React.ComponentProps<"optgroup">) {
+  return (
+    <optgroup
+      data-slot="native-select-optgroup"
+      className={cn("bg-[Canvas] text-[CanvasText]", className)}
+      {...props}
+    />
+  )
+}
+
+export { NativeSelect, NativeSelectOptGroup, NativeSelectOption }

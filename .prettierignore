@@ -1,0 +1,7 @@
+node_modules
+.next
+out
+dist
+coverage
+tsconfig.tsbuildinfo
+pnpm-lock.yaml
