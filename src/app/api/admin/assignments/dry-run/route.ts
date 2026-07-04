@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server"
+import { NextResponse, type NextRequest } from "next/server"
 
-import { requireAdminSession } from "@/shared/server/auth"
+import { requireAdminSession } from "@/shared/server/admin-auth"
 import { jsonError } from "@/shared/server/http"
 import { createCurrentAssignmentPlan } from "@/shared/server/repositories"
 
-export async function POST() {
-  if (!(await requireAdminSession())) {
+export async function POST(request: NextRequest) {
+  if (!(await requireAdminSession(request))) {
     return jsonError("Unauthorized", 401)
   }
 

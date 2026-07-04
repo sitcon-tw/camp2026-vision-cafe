@@ -1,9 +1,7 @@
-import CredentialsProvider from "next-auth/providers/credentials"
 import GitHubProvider from "next-auth/providers/github"
 import { getServerSession, type NextAuthOptions } from "next-auth"
 
 import type { AuthenticatedStudent } from "@/shared/data/vision-cafe-api"
-import { getRequiredEnv } from "@/shared/server/env"
 import { ensureStudentProfile } from "@/shared/server/repositories"
 import { findRosterStudentByGithubUsername } from "@/shared/server/roster"
 
@@ -18,11 +16,6 @@ type GithubProfile = {
 export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ account, token, user }) {
-      if (user?.kind === "admin") {
-        token.kind = "admin"
-        return token
-      }
-
       if (account?.provider === "github") {
         const githubUsername = user?.githubUsername
 
@@ -60,10 +53,6 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async signIn({ account, user }) {
-      if (account?.provider === "credentials") {
-        return user.kind === "admin"
-      }
-
       if (account?.provider !== "github") {
         return false
       }
@@ -82,6 +71,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     error: "/auth/error",
+    signIn: "/select",
   },
   providers: [
     GitHubProvider({
@@ -94,26 +84,6 @@ export const authOptions: NextAuthOptions = {
           id: String(profile.id),
           image: profile.avatar_url ?? null,
           name: profile.name ?? profile.login,
-        }
-      },
-    }),
-    CredentialsProvider({
-      credentials: {
-        password: {
-          label: "Password",
-          type: "password",
-        },
-      },
-      name: "Admin Password",
-      async authorize(credentials) {
-        if (credentials?.password !== getRequiredEnv("ADMIN_PASSWORD")) {
-          return null
-        }
-
-        return {
-          id: "admin",
-          kind: "admin",
-          name: "Admin",
         }
       },
     }),
@@ -145,7 +115,5 @@ export function getStudentFromSession(
 }
 
 export async function requireAdminSession() {
-  const session = await getAppSession()
-
-  return session?.user.kind === "admin" ? session : null
+  return null
 }

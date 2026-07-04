@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 
-import { requireAdminSession } from "@/shared/server/auth"
+import { requireAdminSession } from "@/shared/server/admin-auth"
 import { jsonError } from "@/shared/server/http"
 import {
   getFlowControls,
@@ -17,7 +17,7 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
-  if (!(await requireAdminSession())) {
+  if (!(await requireAdminSession(request))) {
     return jsonError("Unauthorized", 401)
   }
 

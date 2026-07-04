@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 
-import { requireAdminSession } from "@/shared/server/auth"
+import { requireAdminSession } from "@/shared/server/admin-auth"
 import { jsonError } from "@/shared/server/http"
 import { saveStudentPreference } from "@/shared/server/repositories"
 import { findRosterStudentById } from "@/shared/server/roster"
@@ -16,7 +16,7 @@ type RouteContext = {
 }
 
 export async function PUT(request: NextRequest, context: RouteContext) {
-  if (!(await requireAdminSession())) {
+  if (!(await requireAdminSession(request))) {
     return jsonError("Unauthorized", 401)
   }
 

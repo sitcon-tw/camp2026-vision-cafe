@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-import { requireAdminSession } from "@/shared/server/auth"
+import { requireAdminSession } from "@/shared/server/admin-auth"
 import { jsonError } from "@/shared/server/http"
 import { getAdminPreferences } from "@/shared/server/repositories"
 

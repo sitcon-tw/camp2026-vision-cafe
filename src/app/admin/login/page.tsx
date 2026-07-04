@@ -1,7 +1,6 @@
 "use client"
 
 import { LockKeyholeIcon } from "lucide-react"
-import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useState, type FormEvent } from "react"
 
@@ -30,13 +29,24 @@ export default function AdminLoginPage() {
     setSubmitting(true)
     setError(null)
 
-    const result = await signIn("credentials", {
-      password,
-      redirect: false,
+    const response = await fetch("/api/admin/login", {
+      body: JSON.stringify({ password }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
     })
 
-    if (result?.ok) {
-      router.push("/admin/flow")
+    if (response.ok) {
+      const callbackUrl = new URLSearchParams(window.location.search).get(
+        "callbackUrl",
+      )
+      const safeCallbackUrl =
+        callbackUrl?.startsWith("/admin") && callbackUrl !== "/admin/login"
+          ? callbackUrl
+          : "/admin/flow"
+
+      router.push(safeCallbackUrl)
       router.refresh()
       return
     }
