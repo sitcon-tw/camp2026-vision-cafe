@@ -1,9 +1,13 @@
 import type { ReactNode } from "react"
+import Link from "next/link"
 
+import { Button } from "@/shared/ui/button"
 import { cn } from "@/shared/utils"
 
 type AppPageShellProps = {
   action?: ReactNode
+  backHref?: string
+  backLabel?: string
   children: ReactNode
   title: string
   element?: "main" | "div"
@@ -16,6 +20,8 @@ type AppPageShellProps = {
 
 export function AppPageShell({
   action,
+  backHref,
+  backLabel = "返回",
   children,
   title,
   element: Element = "main",
@@ -25,6 +31,17 @@ export function AppPageShell({
   topAction,
   bottomNavInset = false,
 }: AppPageShellProps) {
+  const backAction = backHref ? (
+    <Button
+      asChild
+      variant="ghost"
+      size="sm"
+      className="-ml-2 w-fit justify-start shadow-none"
+    >
+      <Link href={backHref}>{"<-"} {backLabel}</Link>
+    </Button>
+  ) : null
+
   return (
     <Element className="bg-background text-foreground min-h-dvh">
       <section
@@ -37,7 +54,12 @@ export function AppPageShell({
           bottomNavInset && "pb-[calc(7.25rem+env(safe-area-inset-bottom))]",
         )}
       >
-        {topAction ? <div className="flex shrink-0">{topAction}</div> : null}
+        {backAction || topAction ? (
+          <div className="flex shrink-0 items-center justify-between gap-3">
+            {backAction}
+            {topAction ? <div className="flex shrink-0">{topAction}</div> : null}
+          </div>
+        ) : null}
 
         <header className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 flex-col gap-2">

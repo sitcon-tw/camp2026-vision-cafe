@@ -40,7 +40,7 @@ export function LookupClient({ initialLookup }: LookupClientProps) {
 
   if (initialLookup.state === "closed") {
     return (
-      <AppPageShell title="分配講者查詢">
+      <AppPageShell title="分配講者查詢" backHref="/" backLabel="回到首頁">
         <Card>
           <CardHeader className="gap-3">
             <CardTitle className="text-2xl font-black tracking-tight">
@@ -57,7 +57,7 @@ export function LookupClient({ initialLookup }: LookupClientProps) {
 
   if (initialLookup.state === "empty") {
     return (
-      <AppPageShell title="分配講者查詢">
+      <AppPageShell title="分配講者查詢" backHref="/" backLabel="回到首頁">
         <Card>
           <CardHeader className="gap-3">
             <CardTitle className="text-2xl font-black tracking-tight">
@@ -73,7 +73,7 @@ export function LookupClient({ initialLookup }: LookupClientProps) {
   }
 
   return (
-    <AppPageShell title="分配講者查詢">
+    <AppPageShell title="分配講者查詢" backHref="/" backLabel="回到首頁">
       <Card>
         <CardHeader className="gap-3">
           <CardTitle className="text-2xl font-black tracking-tight">

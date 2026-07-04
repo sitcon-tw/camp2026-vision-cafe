@@ -116,7 +116,7 @@ export function SelectClient({ initialData }: SelectClientProps) {
   }
 
   return (
-    <AppPageShell title="講者志願選填">
+    <AppPageShell title="講者志願選填" backHref="/" backLabel="回到首頁">
       <Alert className="grid-cols-[auto_1fr_auto] items-center gap-x-3 has-[>svg]:grid-cols-[auto_1fr_auto] [&>svg]:translate-y-0">
         <CheckIcon
           aria-hidden="true"
