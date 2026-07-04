@@ -1,7 +1,7 @@
 import type {
   AdminFlowControls,
-  SpeakerSessionAssignments,
   SpeakerAssignmentPlan,
+  SpeakerSessionAssignments,
   StudentSpeakerPreference,
   TeamAssignments,
 } from "@/lib/vision-cafe"
@@ -40,6 +40,17 @@ export type AdminPreferencesPayload = {
 
 export type AdminAssignmentPlanPayload = {
   assignmentPlan: SpeakerAssignmentPlan
+}
+
+export type PublishedAssignmentPlan = SpeakerAssignmentPlan & {
+  id: string
+  isActive: boolean
+  publishedAt: string
+  status: "published"
+}
+
+export type AdminPublishedAssignmentPlansPayload = {
+  assignmentPlans: PublishedAssignmentPlan[]
 }
 
 export type ApiErrorPayload = {

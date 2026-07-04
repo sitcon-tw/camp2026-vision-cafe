@@ -1,6 +1,9 @@
 import type { Collection, ObjectId } from "mongodb"
 
-import type { AuthenticatedStudent } from "@/lib/vision-cafe-api"
+import type {
+  AuthenticatedStudent,
+  PublishedAssignmentPlan,
+} from "@/lib/vision-cafe-api"
 import {
   createSpeakerAssignmentPlan,
   createSpeakerSessionAssignments,
@@ -165,6 +168,27 @@ export async function publishCurrentAssignmentPlan() {
   )
 
   return assignmentPlan
+}
+
+export async function getPublishedAssignmentPlans(): Promise<
+  PublishedAssignmentPlan[]
+> {
+  const documents = await assignmentPlansCollection().then((collection) =>
+    collection
+      .find({ status: "published" })
+      .sort({ publishedAt: -1 })
+      .toArray(),
+  )
+
+  return documents.map((document, index) => {
+    const { _id, ...assignmentPlan } = document
+
+    return {
+      ...assignmentPlan,
+      id: _id?.toString() ?? document.publishedAt,
+      isActive: index === 0,
+    }
+  })
 }
 
 export async function getLookupPayload() {
