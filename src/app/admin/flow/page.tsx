@@ -16,6 +16,7 @@ import { Label } from "@/shared/ui/label"
 import { Spinner } from "@/shared/ui/spinner"
 import { Switch } from "@/shared/ui/switch"
 
+import { fetchAdmin } from "../_components/admin-api"
 import { AdminSectionPage } from "../_components/admin-section-page"
 
 export default function AdminFlowPage() {
@@ -26,7 +27,7 @@ export default function AdminFlowPage() {
 
   useEffect(() => {
     async function loadFlowControls() {
-      const response = await fetch("/api/admin/flow-controls")
+      const response = await fetchAdmin("/api/admin/flow-controls")
 
       if (!response.ok) {
         setError("無法載入流程控制。")
@@ -52,7 +53,7 @@ export default function AdminFlowPage() {
     setFlowControls(nextFlowControls)
     setError(null)
 
-    const response = await fetch("/api/admin/flow-controls", {
+    const response = await fetchAdmin("/api/admin/flow-controls", {
       body: JSON.stringify(nextFlowControls),
       headers: {
         "Content-Type": "application/json",

@@ -34,6 +34,7 @@ import {
 } from "@/shared/ui/table"
 import { Spinner } from "@/shared/ui/spinner"
 
+import { fetchAdmin } from "../_components/admin-api"
 import { AdminSectionPage } from "../_components/admin-section-page"
 import { formatSubmittedAt } from "../_components/admin-format"
 
@@ -50,7 +51,7 @@ export default function AdminAssignmentsPage() {
     setPublished(false)
     setError(null)
 
-    const response = await fetch("/api/admin/assignments/dry-run", {
+    const response = await fetchAdmin("/api/admin/assignments/dry-run", {
       method: "POST",
     })
 
@@ -70,7 +71,7 @@ export default function AdminAssignmentsPage() {
     setPublishing(true)
     setError(null)
 
-    const response = await fetch("/api/admin/assignments/publish", {
+    const response = await fetchAdmin("/api/admin/assignments/publish", {
       method: "POST",
     })
 

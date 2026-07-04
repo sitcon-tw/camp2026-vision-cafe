@@ -41,6 +41,7 @@ import {
   TableRow,
 } from "@/shared/ui/table"
 
+import { fetchAdmin } from "../_components/admin-api"
 import { AdminSectionPage } from "../_components/admin-section-page"
 import {
   formatSubmittedAt,
@@ -74,7 +75,7 @@ export default function AdminPreferencesPage() {
 
   useEffect(() => {
     async function loadPreferences() {
-      const response = await fetch("/api/admin/preferences")
+      const response = await fetchAdmin("/api/admin/preferences")
 
       if (!response.ok) {
         setError("無法載入學員志願。")
@@ -102,7 +103,7 @@ export default function AdminPreferencesPage() {
     )
     setError(null)
 
-    const response = await fetch(
+    const response = await fetchAdmin(
       `/api/admin/preferences/${encodeURIComponent(studentId)}`,
       {
         body: JSON.stringify(updates),

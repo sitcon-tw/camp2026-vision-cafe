@@ -42,11 +42,9 @@ const { rosterStudents } = vi.hoisted(() => {
   }
 })
 
-vi.mock("@/shared/server/auth", () => ({
+vi.mock("@/shared/server/admin-auth", () => ({
   requireAdminSession: vi.fn(async () => ({
-    user: {
-      kind: "admin",
-    },
+    kind: "admin",
   })),
 }))
 
@@ -242,7 +240,7 @@ async function putStudentPreference(
 
 async function postDryRun() {
   const route = await import("@/app/api/admin/assignments/dry-run/route")
-  const response = await route.POST()
+  const response = await route.POST(createAdminRequest("POST"))
 
   expect(response.status).toBe(200)
 
@@ -259,7 +257,7 @@ async function postDryRun() {
 
 async function postPublish() {
   const route = await import("@/app/api/admin/assignments/publish/route")
-  const response = await route.POST()
+  const response = await route.POST(createAdminRequest("POST"))
 
   expect(response.status).toBe(200)
 
@@ -311,4 +309,8 @@ function createJsonRequest(body: unknown) {
     },
     method: "PUT",
   }) as NextRequest
+}
+
+function createAdminRequest(method: string) {
+  return new Request("http://localhost/api/test", { method }) as NextRequest
 }
