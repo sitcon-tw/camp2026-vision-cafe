@@ -11,14 +11,14 @@ export default function LoginPage() {
       <Card>
         <CardHeader className="gap-3">
           <CardTitle className="text-2xl font-black tracking-tight">
-            選擇講者志願
+            選擇志願
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Button asChild size="lg" className="w-full">
             <a href="/select">
               <ListChecksIcon aria-hidden="true" data-icon="inline-start" />
-              選擇講者志願
+              前往選擇
             </a>
           </Button>
         </CardContent>
@@ -27,7 +27,7 @@ export default function LoginPage() {
       <Card>
         <CardHeader className="gap-3">
           <CardTitle className="text-2xl font-black tracking-tight">
-            查詢分配講者
+            查詢分配結果
           </CardTitle>
         </CardHeader>
         <CardContent>
