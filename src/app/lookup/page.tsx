@@ -34,14 +34,7 @@ export default function LookupPage() {
   )
 
   return (
-    <AppPageShell>
-      <header className="flex flex-col gap-2 pt-1">
-        <p className="text-muted-foreground text-sm leading-6">視界咖啡館</p>
-        <h1 className="text-3xl leading-tight font-black tracking-tight">
-          分配講者查詢
-        </h1>
-      </header>
-
+    <AppPageShell title="分配講者查詢">
       <Card>
         <CardHeader className="gap-3">
           <CardTitle className="text-2xl font-black tracking-tight">

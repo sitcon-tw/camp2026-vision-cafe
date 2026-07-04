@@ -73,8 +73,7 @@ export default function SelectPage() {
   }
 
   return (
-    <AppPageShell>
-      <StudentHeader />
+    <AppPageShell title="講者志願選填">
       <SpeakerIntroList speakers={speakers} />
 
       <PreferenceDialog
@@ -84,21 +83,6 @@ export default function SelectPage() {
         onUpdateOrder={updateOrder}
       />
     </AppPageShell>
-  )
-}
-
-function StudentHeader() {
-  return (
-    <header className="flex items-start gap-3 pt-1">
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl leading-tight font-black tracking-tight">
-            講者志願選填
-          </h1>
-          <p className="text-muted-foreground text-sm leading-6">視界咖啡館</p>
-        </div>
-      </div>
-    </header>
   )
 }
 
