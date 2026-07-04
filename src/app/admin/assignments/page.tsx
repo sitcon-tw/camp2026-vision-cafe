@@ -3,17 +3,17 @@
 import { CalendarClockIcon, ClipboardListIcon, PlayIcon } from "lucide-react"
 import { useState } from "react"
 
-import type { AdminAssignmentPlanPayload } from "@/shared/data/vision-cafe-api"
-import type { SpeakerAssignmentPlan } from "@/shared/data/vision-cafe"
-import { Badge } from "@/shared/ui/badge"
-import { Button } from "@/shared/ui/button"
+import type { AdminAssignmentPlanPayload } from "@/lib/vision-cafe-api"
+import type { SpeakerAssignmentPlan } from "@/lib/vision-cafe"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/ui/card"
+} from "@/components/ui/card"
 import {
   Dialog,
   DialogClose,
@@ -23,7 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/shared/ui/dialog"
+} from "@/components/ui/dialog"
 import {
   Table,
   TableBody,
@@ -31,12 +31,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/shared/ui/table"
-import { Spinner } from "@/shared/ui/spinner"
+} from "@/components/ui/table"
+import { Spinner } from "@/components/ui/spinner"
 
-import { fetchAdmin } from "../_components/admin-api"
-import { AdminSectionPage } from "../_components/admin-section-page"
-import { formatSubmittedAt } from "../_components/admin-format"
+import { fetchAdmin } from "@/app/admin/_components/api-client"
+import { AdminSectionPage } from "@/app/admin/_components/section-page"
+import { formatSubmittedAt } from "@/app/admin/_components/date-time"
 
 export default function AdminAssignmentsPage() {
   const [assignmentPlan, setAssignmentPlan] =

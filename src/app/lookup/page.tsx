@@ -1,6 +1,6 @@
-import { getLookupPayload } from "@/shared/server/repositories"
+import { getLookupPayload } from "@/lib/server/repositories"
 
-import { LookupClient } from "./lookup-client"
+import { LookupClient } from "./_components/lookup-client"
 
 export const dynamic = "force-dynamic"
 

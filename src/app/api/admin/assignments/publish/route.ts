@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server"
 
-import { requireAdminSession } from "@/shared/server/admin-auth"
-import { jsonError } from "@/shared/server/http"
-import { publishCurrentAssignmentPlan } from "@/shared/server/repositories"
+import { requireAdminSession } from "@/lib/server/admin-auth"
+import { jsonError } from "@/lib/server/http"
+import { publishCurrentAssignmentPlan } from "@/lib/server/repositories"
 
 export async function POST(request: NextRequest) {
   if (!(await requireAdminSession(request))) {

@@ -1,14 +1,14 @@
 import Link from "next/link"
 
-import { AppPageShell } from "@/shared/ui/app-page-shell"
-import { Button } from "@/shared/ui/button"
+import { AppPageShell } from "@/components/ui/app-page-shell"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/ui/card"
+} from "@/components/ui/card"
 
 export default function AuthErrorPage() {
   return (

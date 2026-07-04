@@ -1,9 +1,9 @@
 import { ListChecksIcon, SearchIcon } from "lucide-react"
 import Link from "next/link"
 
-import { AppPageShell } from "@/shared/ui/app-page-shell"
-import { Button } from "@/shared/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card"
+import { AppPageShell } from "@/components/ui/app-page-shell"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function LoginPage() {
   return (

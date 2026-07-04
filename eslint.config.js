@@ -68,12 +68,12 @@ export default tseslint.config(
         {
           selector: `Literal[value=/${rawTailwindPalettePattern}/]`,
           message:
-            "Use semantic color tokens from src/shared/config/color-palette.ts and src/app/globals.css instead of raw Tailwind palette classes.",
+            "Use semantic color tokens from src/app/globals.css instead of raw Tailwind palette classes.",
         },
         {
           selector: `TemplateElement[value.raw=/${rawTailwindPalettePattern}/]`,
           message:
-            "Use semantic color tokens from src/shared/config/color-palette.ts and src/app/globals.css instead of raw Tailwind palette classes.",
+            "Use semantic color tokens from src/app/globals.css instead of raw Tailwind palette classes.",
         },
         {
           selector: `CallExpression[callee.property.name=/^(${deprecatedZodStringFormatMethods})$/][callee.object.type="CallExpression"]`,
@@ -84,18 +84,11 @@ export default tseslint.config(
     },
   },
   {
-    files: ["src/shared/**/*.{ts,tsx}"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: ["@/app/*", "@/routes/*", "@/pages/*", "@/features/*"],
-        },
-      ],
-    },
-  },
-  {
-    files: ["src/features/**/*.{ts,tsx}"],
+    files: [
+      "src/components/**/*.{ts,tsx}",
+      "src/hooks/**/*.{ts,tsx}",
+      "src/lib/**/*.{ts,tsx}",
+    ],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -106,14 +99,9 @@ export default tseslint.config(
     },
   },
   {
-    files: ["src/pages/**/*.{ts,tsx}"],
+    files: ["src/**/*.test.{ts,tsx}"],
     rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: ["@/app/*", "@/routes/*"],
-        },
-      ],
+      "no-restricted-imports": "off",
     },
   },
   prettier,

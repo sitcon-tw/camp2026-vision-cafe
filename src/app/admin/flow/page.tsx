@@ -3,21 +3,21 @@
 import { CheckCircle2Icon, Settings2Icon, XCircleIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 
-import type { AdminFlowControls } from "@/shared/data/vision-cafe"
-import { Badge } from "@/shared/ui/badge"
+import type { AdminFlowControls } from "@/lib/vision-cafe"
+import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/ui/card"
-import { Label } from "@/shared/ui/label"
-import { Spinner } from "@/shared/ui/spinner"
-import { Switch } from "@/shared/ui/switch"
+} from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Spinner } from "@/components/ui/spinner"
+import { Switch } from "@/components/ui/switch"
 
-import { fetchAdmin } from "../_components/admin-api"
-import { AdminSectionPage } from "../_components/admin-section-page"
+import { fetchAdmin } from "@/app/admin/_components/api-client"
+import { AdminSectionPage } from "@/app/admin/_components/section-page"
 
 export default function AdminFlowPage() {
   const [flowControls, setFlowControls] = useState<AdminFlowControls | null>(

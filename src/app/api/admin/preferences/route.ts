@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 
-import { requireAdminSession } from "@/shared/server/admin-auth"
-import { jsonError } from "@/shared/server/http"
-import { getAdminPreferences } from "@/shared/server/repositories"
+import { requireAdminSession } from "@/lib/server/admin-auth"
+import { jsonError } from "@/lib/server/http"
+import { getAdminPreferences } from "@/lib/server/repositories"
 
 export async function GET() {
   if (!(await requireAdminSession())) {

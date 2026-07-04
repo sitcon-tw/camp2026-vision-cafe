@@ -4,19 +4,19 @@ import { LockKeyholeIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, type FormEvent } from "react"
 
-import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert"
-import { AppPageShell } from "@/shared/ui/app-page-shell"
-import { Button } from "@/shared/ui/button"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AppPageShell } from "@/components/ui/app-page-shell"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/ui/card"
-import { Input } from "@/shared/ui/input"
-import { Label } from "@/shared/ui/label"
-import { Spinner } from "@/shared/ui/spinner"
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Spinner } from "@/components/ui/spinner"
 
 export default function AdminLoginPage() {
   const router = useRouter()

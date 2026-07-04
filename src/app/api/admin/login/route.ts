@@ -3,8 +3,8 @@ import { NextResponse, type NextRequest } from "next/server"
 import {
   adminPasswordMatches,
   setAdminSessionCookie,
-} from "@/shared/server/admin-auth"
-import { jsonError } from "@/shared/server/http"
+} from "@/lib/server/admin-auth"
+import { jsonError } from "@/lib/server/http"
 
 export async function POST(request: NextRequest) {
   if (request.headers.get("origin") !== request.nextUrl.origin) {

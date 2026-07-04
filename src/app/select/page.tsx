@@ -1,8 +1,8 @@
-import { getAppSession, getStudentFromSession } from "@/shared/server/auth"
-import { getStudentSelectionPayload } from "@/shared/server/repositories"
-import { StudentLoginGate } from "@/shared/ui/student-login-gate"
+import { getAppSession, getStudentFromSession } from "@/lib/server/auth"
+import { getStudentSelectionPayload } from "@/lib/server/repositories"
+import { StudentLoginGate } from "./_components/student-login-gate"
 
-import { SelectClient } from "./select-client"
+import { SelectClient } from "./_components/select-client"
 
 export const dynamic = "force-dynamic"
 

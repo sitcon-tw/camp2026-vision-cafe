@@ -1,12 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server"
 
-import { requireAdminSession } from "@/shared/server/admin-auth"
-import { jsonError } from "@/shared/server/http"
+import { requireAdminSession } from "@/lib/server/admin-auth"
+import { jsonError } from "@/lib/server/http"
 import {
   getFlowControls,
   updateFlowControls,
-} from "@/shared/server/repositories"
-import { flowControlsSchema } from "@/shared/server/validation"
+} from "@/lib/server/repositories"
+import { flowControlsSchema } from "@/lib/server/validation"
 
 export async function GET() {
   if (!(await requireAdminSession())) {

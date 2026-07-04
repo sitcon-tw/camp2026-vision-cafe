@@ -1,13 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server"
 
-import { requireAdminSession } from "@/shared/server/admin-auth"
-import { jsonError } from "@/shared/server/http"
-import { saveStudentPreference } from "@/shared/server/repositories"
-import { findRosterStudentById } from "@/shared/server/roster"
+import { requireAdminSession } from "@/lib/server/admin-auth"
+import { jsonError } from "@/lib/server/http"
+import { saveStudentPreference } from "@/lib/server/repositories"
+import { findRosterStudentById } from "@/lib/server/roster"
 import {
   preferenceUpdateSchema,
   validateSpeakerPreferenceOrder,
-} from "@/shared/server/validation"
+} from "@/lib/server/validation"
 
 type RouteContext = {
   params: Promise<{

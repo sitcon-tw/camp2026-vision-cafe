@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 
-import { getAppSession, getStudentFromSession } from "@/shared/server/auth"
-import { jsonError } from "@/shared/server/http"
-import { getStudentSelectionPayload } from "@/shared/server/repositories"
+import { getAppSession, getStudentFromSession } from "@/lib/server/auth"
+import { jsonError } from "@/lib/server/http"
+import { getStudentSelectionPayload } from "@/lib/server/repositories"
 
 export async function GET() {
   const session = await getAppSession()

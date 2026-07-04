@@ -1,16 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server"
 
-import { getAppSession, getStudentFromSession } from "@/shared/server/auth"
-import { jsonError } from "@/shared/server/http"
+import { getAppSession, getStudentFromSession } from "@/lib/server/auth"
+import { jsonError } from "@/lib/server/http"
 import {
   getFlowControls,
   getStudentPreference,
   saveStudentPreference,
-} from "@/shared/server/repositories"
+} from "@/lib/server/repositories"
 import {
   studentPreferenceSubmitSchema,
   validateSpeakerPreferenceOrder,
-} from "@/shared/server/validation"
+} from "@/lib/server/validation"
 
 export async function PUT(request: NextRequest) {
   const session = await getAppSession()

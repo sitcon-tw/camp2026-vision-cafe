@@ -6,7 +6,15 @@ Clean Next.js starter for the CAMP 2026 Vision Cafe app.
 
 - Next.js App Router
 - React, TypeScript, Tailwind CSS v4
-- shadcn components and CAMP 2026 theme tokens in `src/shared` and `src/app/globals.css`
+- shadcn components and CAMP 2026 theme tokens in `src/components` and `src/app/globals.css`
+
+## Source layout
+
+- `src/app`: Next.js routes and route-private `_components`.
+- `src/components/ui`: reusable UI primitives.
+- `src/hooks`: reusable React hooks.
+- `src/lib`: utilities, domain logic, repositories, validation, and integrations.
+- `src/types`: ambient TypeScript declarations.
 
 ## Development
 

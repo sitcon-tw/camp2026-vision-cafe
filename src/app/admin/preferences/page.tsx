@@ -3,13 +3,13 @@
 import { PencilIcon, SearchIcon, SlidersHorizontalIcon } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
-import type { AdminPreferencesPayload } from "@/shared/data/vision-cafe-api"
+import type { AdminPreferencesPayload } from "@/lib/vision-cafe-api"
 import {
   getSpeakerCandidateNames,
   type StudentSpeakerPreference,
-} from "@/shared/data/vision-cafe"
-import { Badge } from "@/shared/ui/badge"
-import { Button } from "@/shared/ui/button"
+} from "@/lib/vision-cafe"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -17,7 +17,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/ui/card"
+} from "@/components/ui/card"
 import {
   Dialog,
   DialogClose,
@@ -27,11 +27,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/shared/ui/dialog"
-import { Input } from "@/shared/ui/input"
-import { Label } from "@/shared/ui/label"
-import { NativeSelect, NativeSelectOption } from "@/shared/ui/native-select"
-import { Spinner } from "@/shared/ui/spinner"
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { Spinner } from "@/components/ui/spinner"
 import {
   Table,
   TableBody,
@@ -39,15 +39,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/shared/ui/table"
+} from "@/components/ui/table"
 
-import { fetchAdmin } from "../_components/admin-api"
-import { AdminSectionPage } from "../_components/admin-section-page"
+import { fetchAdmin } from "@/app/admin/_components/api-client"
+import { AdminSectionPage } from "@/app/admin/_components/section-page"
 import {
   formatSubmittedAt,
   fromDateTimeLocalValue,
   toDateTimeLocalValue,
-} from "../_components/admin-format"
+} from "@/app/admin/_components/date-time"
 
 export default function AdminPreferencesPage() {
   const [preferences, setPreferences] = useState<StudentSpeakerPreference[]>([])
