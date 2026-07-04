@@ -135,7 +135,7 @@ export default function AdminPreferencesPage() {
             學員志願序
           </CardTitle>
           <CardDescription className="text-base leading-7">
-            查看、搜尋並修改每位學員的志願序與送出時間。
+            查看、搜尋並修改每位學員的志願序與送出時間。分配優先序以送出時間為準，未送出者排最後。
           </CardDescription>
           <CardAction>
             <Badge variant="secondary">{preferences.length} 位學員</Badge>
@@ -229,16 +229,7 @@ function PreferenceRow({
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex flex-wrap gap-1.5">
-          {preference.preferenceOrder.map((speakerName, index) => (
-            <Badge
-              key={`${preference.studentId}-${speakerName}`}
-              variant="outline"
-            >
-              {index + 1}. {speakerName}
-            </Badge>
-          ))}
-        </div>
+        <PreferenceOrderBadges preference={preference} />
       </TableCell>
       <TableCell>{formatSubmittedAt(preference.submittedAt)}</TableCell>
       <TableCell className="text-right">
@@ -267,7 +258,7 @@ function EditPreferenceDialog({
   onUpdatePreference,
 }: EditPreferenceDialogProps) {
   const [preferenceOrder, setPreferenceOrder] = useState(
-    preference.preferenceOrder,
+    createEditablePreferenceOrder(preference.preferenceOrder, speakerNames),
   )
   const [submittedAt, setSubmittedAt] = useState(
     toDateTimeLocalValue(preference.submittedAt),
@@ -370,6 +361,37 @@ function EditPreferenceDialog({
       </DialogContent>
     </Dialog>
   )
+}
+
+type PreferenceOrderBadgesProps = {
+  preference: StudentSpeakerPreference
+}
+
+function PreferenceOrderBadges({ preference }: PreferenceOrderBadgesProps) {
+  if (preference.preferenceOrder.length === 0) {
+    return <Badge variant="secondary">尚未送出志願</Badge>
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {preference.preferenceOrder.map((speakerName, index) => (
+        <Badge key={`${preference.studentId}-${speakerName}`} variant="outline">
+          {index + 1}. {speakerName}
+        </Badge>
+      ))}
+    </div>
+  )
+}
+
+function createEditablePreferenceOrder(
+  preferenceOrder: string[],
+  speakerNames: string[],
+) {
+  if (preferenceOrder.length === 0) {
+    return speakerNames
+  }
+
+  return preferenceOrder
 }
 
 function updateLocalPreference(
