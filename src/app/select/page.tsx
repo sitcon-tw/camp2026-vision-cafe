@@ -48,7 +48,7 @@ import {
   getSpeakerCandidates,
   type Speaker,
   type SpeakerLink,
-} from "./speaker-data"
+} from "@/shared/data/vision-cafe"
 
 type DragState = {
   speakerName: string

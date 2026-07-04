@@ -15,13 +15,13 @@ import {
 import { NativeSelect, NativeSelectOption } from "@/shared/ui/native-select"
 
 import {
+  getSpeakerCandidateByName,
   getTeamAssignmentNames,
   getTeamAssignments,
   getTeamAssignmentsByName,
   type SpeakerAssignment,
   type TeamAssignments,
-} from "./assignment-data"
-import { getSpeakerCandidateByName } from "../select/speaker-data"
+} from "@/shared/data/vision-cafe"
 
 export default function LookupPage() {
   const fallbackTeam = getTeamAssignments()[0]
