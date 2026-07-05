@@ -1,0 +1,11 @@
+.git
+.DS_Store
+README.md
+AGENTS.md
+frontend/node_modules
+frontend/dist
+frontend/coverage
+frontend/tsconfig.tsbuildinfo
+backend/target
+backend/.env
+backend/.env.local
