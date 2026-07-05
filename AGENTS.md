@@ -4,7 +4,7 @@
 
 ## Page Containers
 
-- All top-level pages under `src/app` must use `AppPageShell` from `src/components/ui/app-page-shell`.
+- All top-level frontend pages under `frontend/src/routes` must use `AppPageShell` from `frontend/src/components/ui/app-page-shell`.
 - Do not hand-roll page-level `<main>`, content container, label, or title header class strings in individual pages.
 - The standard page container is centered, full-height, mobile-first, and fixed to `max-w-md` with `px-4 py-5` and `gap-5`.
 - Detail/workflow pages should use the default top-aligned content; the main entry page may opt into vertical centering with `contentPlacement="center"`.

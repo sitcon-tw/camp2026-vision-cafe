@@ -1,26 +1,56 @@
 # camp2026-vision-cafe
 
-Clean Next.js starter for the CAMP 2026 Vision Cafe app.
+Vision Cafe speaker preference and assignment app for CAMP 2026.
 
 ## Stack
 
-- Next.js App Router
-- React, TypeScript, Tailwind CSS v4
-- shadcn components and CAMP 2026 theme tokens in `src/components` and `src/app/globals.css`
+- `frontend`: Vite, React, TypeScript, Tailwind CSS v4, shadcn/ui
+- `backend`: Rust API with Axum, MongoDB, GitHub OAuth, and Google Sheets roster lookup
 
-## Source layout
+## Source Layout
 
-- `src/app`: Next.js routes and route-private `_components`.
-- `src/components/ui`: reusable UI primitives.
-- `src/hooks`: reusable React hooks.
-- `src/lib`: utilities, domain logic, repositories, validation, and integrations.
-- `src/types`: ambient TypeScript declarations.
+- `frontend/src/routes`: frontend route components.
+- `frontend/src/components/ui`: reusable UI primitives.
+- `frontend/src/lib`: frontend utilities, shared API types, and display grouping helpers.
+- `backend/src`: Rust API service and backend domain logic.
+- `backend/shared`: shared static configuration used by both frontend and backend.
 
 ## Development
 
 ```bash
+cd frontend
 pnpm install
 pnpm dev
+
+cd ../backend
+cargo run
 ```
 
-The app runs on `http://localhost:3000`.
+Vite runs on `http://localhost:5173` and proxies `/api/*` to the Rust API on `http://localhost:3000`.
+
+## Commands
+
+Frontend commands run from `frontend/`:
+
+```bash
+pnpm install
+pnpm dev
+pnpm preview
+pnpm test
+pnpm typecheck
+pnpm lint
+pnpm format
+pnpm format:write
+pnpm build
+pnpm quality
+```
+
+Backend commands run from `backend/`:
+
+```bash
+cargo run
+cargo fmt --check
+cargo test
+cargo clippy -- -D warnings
+cargo build --release
+```
