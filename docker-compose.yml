@@ -1,0 +1,77 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      APP_BASE_URL: ${APP_BASE_URL:?Set APP_BASE_URL to the public app URL}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET}
+      AUTH_GITHUB_ID: ${AUTH_GITHUB_ID:?Set AUTH_GITHUB_ID}
+      AUTH_GITHUB_SECRET: ${AUTH_GITHUB_SECRET:?Set AUTH_GITHUB_SECRET}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD}
+      GOOGLE_SERVICE_ACCOUNT_EMAIL: ${GOOGLE_SERVICE_ACCOUNT_EMAIL:?Set GOOGLE_SERVICE_ACCOUNT_EMAIL}
+      GOOGLE_PRIVATE_KEY: ${GOOGLE_PRIVATE_KEY:?Set GOOGLE_PRIVATE_KEY}
+      GOOGLE_SHEETS_ROSTER_SPREADSHEET_ID: ${GOOGLE_SHEETS_ROSTER_SPREADSHEET_ID:?Set GOOGLE_SHEETS_ROSTER_SPREADSHEET_ID}
+      GOOGLE_SHEETS_ROSTER_SHEET_NAME: ${GOOGLE_SHEETS_ROSTER_SHEET_NAME:-學員帳號}
+      MONGODB_URI: mongodb://vision_cafe:${MONGODB_PASSWORD:?Set MONGODB_PASSWORD}@mongodb:27017/vision_cafe?authSource=admin
+      MONGODB_DB: vision_cafe
+    expose:
+      - "3000"
+    networks:
+      - dokploy-network
+      - app-private
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: rebuild
+          path: ./backend
+          ignore:
+            - target/
+            - .env
+            - .env.local
+        - action: rebuild
+          path: ./frontend
+          ignore:
+            - node_modules/
+            - dist/
+            - coverage/
+            - tsconfig.tsbuildinfo
+
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: vision_cafe
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:?Set MONGODB_PASSWORD}
+      MONGO_INITDB_DATABASE: vision_cafe
+    volumes:
+      - vision-cafe-mongodb:/data/db
+    expose:
+      - "27017"
+    networks:
+      - app-private
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'mongosh --quiet "mongodb://$${MONGO_INITDB_ROOT_USERNAME}:$${MONGO_INITDB_ROOT_PASSWORD}@localhost:27017/admin" --eval ''db.adminCommand({ ping: 1 }).ok'' | grep 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  vision-cafe-mongodb:
+
+networks:
+  dokploy-network:
+    external: true
+  app-private:
+    internal: true
