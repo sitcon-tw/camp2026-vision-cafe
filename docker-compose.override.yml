@@ -1,0 +1,9 @@
+services:
+  app:
+    ports:
+      - "3000:3000"
+    networks:
+      - app-local
+
+networks:
+  app-local:

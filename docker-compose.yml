@@ -24,7 +24,6 @@ services:
     expose:
       - "3000"
     networks:
-      - dokploy-network
       - app-private
     restart: unless-stopped
     develop:
@@ -71,7 +70,5 @@ volumes:
   vision-cafe-mongodb:
 
 networks:
-  dokploy-network:
-    external: true
   app-private:
     internal: true
