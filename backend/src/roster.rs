@@ -70,8 +70,13 @@ pub fn parse_roster_students(rows: Vec<Vec<String>>) -> Vec<AuthenticatedStudent
             let student_name = read_column(row, &header, "學員姓名");
             let student_id = read_column(row, &header, "token");
             let github_username = read_column(row, &header, "GitHub username");
+            let telegram_group_url = read_column(row, &header, "Telegram 群組連結");
 
-            if team_id.is_empty() || student_id.is_empty() || github_username.is_empty() {
+            if team_id.is_empty()
+                || student_id.is_empty()
+                || github_username.is_empty()
+                || telegram_group_url.is_empty()
+            {
                 return None;
             }
 
@@ -215,30 +220,42 @@ mod tests {
                 "學員姓名".to_string(),
                 "token".to_string(),
                 "GitHub username".to_string(),
+                "Telegram 群組連結".to_string(),
             ],
             vec![
                 "1".to_string(),
                 "小明".to_string(),
                 "student-1".to_string(),
                 "Octocat".to_string(),
+                "https://t.me/+team1".to_string(),
             ],
             vec![
                 "2".to_string(),
                 "缺帳號".to_string(),
                 "student-2".to_string(),
                 String::new(),
+                "https://t.me/+team2".to_string(),
             ],
             vec![
                 String::new(),
                 "測試".to_string(),
                 "student-3".to_string(),
                 "staff-user".to_string(),
+                "https://t.me/+team3".to_string(),
             ],
             vec![
                 "3".to_string(),
                 "小華".to_string(),
                 "student-4".to_string(),
                 "@Mona".to_string(),
+                "https://t.me/+team3".to_string(),
+            ],
+            vec![
+                "4".to_string(),
+                "缺 Telegram".to_string(),
+                "student-5".to_string(),
+                "no-telegram".to_string(),
+                String::new(),
             ],
         ]);
 
@@ -253,12 +270,14 @@ mod tests {
             vec![
                 "GitHub username".to_string(),
                 "token".to_string(),
+                "Telegram 群組連結".to_string(),
                 "學員姓名".to_string(),
                 "小隊".to_string(),
             ],
             vec![
                 "octocat".to_string(),
                 "student-1".to_string(),
+                "https://t.me/+team5".to_string(),
                 "小明".to_string(),
                 "5".to_string(),
             ],
