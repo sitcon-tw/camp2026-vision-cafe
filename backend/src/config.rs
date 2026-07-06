@@ -57,7 +57,7 @@ impl Config {
     }
 
     pub fn github_redirect_uri(&self) -> String {
-        format!("{}/api/auth/github/callback", self.app_base_url)
+        app_url_with_path(&self.app_base_url, "/api/auth/github/callback")
     }
 }
 
@@ -100,5 +100,32 @@ fn origin_from_base_url(app_base_url: &str) -> String {
             trimmed[..host_end].to_string()
         }
         None => trimmed.to_string(),
+    }
+}
+
+fn app_url_with_path(app_base_url: &str, path: &str) -> String {
+    format!("{}{}", app_base_url.trim_end_matches('/'), path)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::app_url_with_path;
+
+    #[test]
+    fn joins_app_base_url_without_duplicate_slashes() {
+        assert_eq!(
+            app_url_with_path(
+                "https://vision-cafe.sitcon.party",
+                "/api/auth/github/callback"
+            ),
+            "https://vision-cafe.sitcon.party/api/auth/github/callback"
+        );
+        assert_eq!(
+            app_url_with_path(
+                "https://vision-cafe.sitcon.party/",
+                "/api/auth/github/callback"
+            ),
+            "https://vision-cafe.sitcon.party/api/auth/github/callback"
+        );
     }
 }
