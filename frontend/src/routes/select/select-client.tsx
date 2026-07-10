@@ -11,6 +11,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AppPageShell } from "@/components/ui/app-page-shell"
+import { ParticipantRoleBadge } from "@/components/participant-role-badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -121,7 +122,10 @@ export function SelectClient({ initialData }: SelectClientProps) {
           className="row-span-2 row-start-1 self-center"
         />
         <AlertTitle className="col-start-2 row-start-1">
-          {initialData.student.studentName} / {initialData.student.teamName}
+          <span className="flex flex-wrap items-center gap-2">
+            {initialData.student.studentName} / {initialData.student.teamName}
+            <ParticipantRoleBadge role={initialData.student.participantRole} />
+          </span>
         </AlertTitle>
         <AlertDescription className="col-start-2 row-start-2">
           <p>已使用 GitHub 帳號 {initialData.student.githubUsername} 登入。</p>

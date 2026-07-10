@@ -3,6 +3,7 @@ import { useMemo, useState } from "react"
 
 import type { LookupPayload } from "@/lib/vision-cafe-api"
 import { AppPageShell } from "@/components/ui/app-page-shell"
+import { ParticipantRoleBadge } from "@/components/participant-role-badge"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -107,7 +108,7 @@ export function LookupClient({ initialLookup }: LookupClientProps) {
                 選擇組別
               </CardTitle>
               <CardDescription className="text-base leading-7">
-                查看該組每位學員唯一的講者與場次。
+                查看該組每位學員與隊輔的講者及場次。
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -136,7 +137,7 @@ export function LookupClient({ initialLookup }: LookupClientProps) {
                 選擇場次
               </CardTitle>
               <CardDescription className="text-base leading-7">
-                依講者場次查看該場學員名單。
+                依講者場次查看該場學員與隊輔名單。
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -185,27 +186,29 @@ type TeamAssignmentListProps = {
 }
 
 function TeamAssignmentList({ team }: TeamAssignmentListProps) {
+  const studentCount = team.assignments.filter(
+    (assignment) => assignment.participantRole === "student",
+  ).length
+  const counselorCount = team.assignments.length - studentCount
+
   return (
     <Card>
       <CardHeader className="gap-3">
         <Badge variant="outline" className="w-fit">
           <UsersIcon aria-hidden="true" data-icon="inline-start" />
-          {team.assignments.length} 位學生
+          {studentCount} 位學員＋{counselorCount} 位隊輔
         </Badge>
         <CardTitle className="text-2xl font-black tracking-tight">
           {team.teamName}
         </CardTitle>
         <CardDescription className="text-base leading-7">
-          學生名單與對應的講者場次。
+          學員與隊輔名單及其對應的講者場次。
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-2">
           {team.assignments.map((assignment) => (
-            <AssignmentRow
-              key={assignment.studentName}
-              assignment={assignment}
-            />
+            <AssignmentRow key={assignment.studentId} assignment={assignment} />
           ))}
         </div>
       </CardContent>
@@ -223,13 +226,13 @@ function SessionAssignmentList({ session }: SessionAssignmentListProps) {
       <CardHeader className="gap-3">
         <Badge variant="outline" className="w-fit">
           <ClockIcon aria-hidden="true" data-icon="inline-start" />
-          {session.count} 位學生
+          {session.studentCount} 位學員＋{session.counselorCount} 位隊輔
         </Badge>
         <CardTitle className="text-2xl font-black tracking-tight">
           {session.speakerName} / {session.sessionLabel}
         </CardTitle>
         <CardDescription className="text-base leading-7">
-          這個場次的學員名單。
+          這個場次的學員與隊輔名單。
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -243,7 +246,7 @@ function SessionAssignmentList({ session }: SessionAssignmentListProps) {
             ))
           ) : (
             <p className="text-muted-foreground text-sm font-semibold">
-              這個場次目前沒有學員。
+              這個場次目前沒有參與者。
             </p>
           )}
         </div>
@@ -263,8 +266,9 @@ function AssignmentRow({ assignment }: AssignmentRowProps) {
 
   return (
     <div className="border-ink bg-background flex items-center justify-between gap-3 rounded-[1rem] border-2 px-4 py-3">
-      <span className="min-w-0 flex-1 text-base font-black">
+      <span className="flex min-w-0 flex-1 flex-wrap items-center gap-2 text-base font-black">
         {assignment.studentName}
+        <ParticipantRoleBadge role={assignment.participantRole} />
       </span>
       <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
         <Badge variant={speaker ? "default" : "destructive"}>

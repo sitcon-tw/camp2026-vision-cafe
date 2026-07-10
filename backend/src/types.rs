@@ -1,9 +1,19 @@
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum ParticipantRole {
+    #[default]
+    Student,
+    Counselor,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct AuthenticatedStudent {
+    #[serde(default)]
+    pub participant_role: ParticipantRole,
     pub student_id: String,
     pub student_name: String,
     pub team_id: String,
@@ -21,6 +31,8 @@ pub struct AdminFlowControls {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct StudentSpeakerPreference {
+    #[serde(default)]
+    pub participant_role: ParticipantRole,
     pub student_id: String,
     pub student_name: String,
     pub team_name: String,
@@ -31,6 +43,8 @@ pub struct StudentSpeakerPreference {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct SpeakerAssignment {
+    #[serde(default)]
+    pub participant_role: ParticipantRole,
     pub session_index: Option<u32>,
     pub session_label: Option<String>,
     pub status: SpeakerAssignmentStatus,
@@ -43,6 +57,8 @@ pub struct SpeakerAssignment {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct PlannedSpeakerAssignment {
+    #[serde(default)]
+    pub participant_role: ParticipantRole,
     pub session_index: Option<u32>,
     pub session_label: Option<String>,
     pub status: SpeakerAssignmentStatus,
@@ -68,27 +84,40 @@ pub enum SpeakerAssignmentStatus {
 #[serde(rename_all = "camelCase")]
 pub struct SpeakerAssignmentPlan {
     pub assignments: Vec<PlannedSpeakerAssignment>,
-    pub assigned_count: usize,
+    #[serde(alias = "assignedCount")]
+    pub assigned_student_count: usize,
+    #[serde(default)]
+    pub assigned_counselor_count: usize,
     pub generated_at: String,
     pub session_capacity: usize,
     pub session_loads: Vec<SpeakerSessionLoad>,
     pub sessions_per_speaker: usize,
     pub speaker_loads: Vec<SpeakerLoad>,
-    pub total_capacity: usize,
-    pub unassigned_count: usize,
+    #[serde(alias = "totalCapacity")]
+    pub student_capacity: usize,
+    #[serde(alias = "unassignedCount")]
+    pub unassigned_student_count: usize,
+    #[serde(default)]
+    pub unassigned_counselor_count: usize,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct SpeakerLoad {
     pub speaker_name: String,
-    pub count: usize,
+    #[serde(alias = "count")]
+    pub student_count: usize,
+    #[serde(default)]
+    pub counselor_count: usize,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct SpeakerSessionLoad {
-    pub count: usize,
+    #[serde(alias = "count")]
+    pub student_count: usize,
+    #[serde(default)]
+    pub counselor_count: usize,
     pub session_index: u32,
     pub session_label: String,
     pub speaker_name: String,
@@ -107,7 +136,10 @@ pub type TeamAssignments = AssignmentGroup<SpeakerAssignment>;
 #[serde(rename_all = "camelCase")]
 pub struct SpeakerSessionAssignments<TAssignment = SpeakerAssignment> {
     pub assignments: Vec<TAssignment>,
-    pub count: usize,
+    #[serde(alias = "count")]
+    pub student_count: usize,
+    #[serde(default)]
+    pub counselor_count: usize,
     pub session_index: u32,
     pub session_label: String,
     pub speaker_name: String,
@@ -212,6 +244,8 @@ pub struct PreferenceDocument {
     #[serde(rename = "_id")]
     pub id: String,
     pub github_username: String,
+    #[serde(default)]
+    pub participant_role: ParticipantRole,
     pub preference_order: Vec<String>,
     pub student_id: String,
     pub student_name: String,
@@ -240,4 +274,39 @@ pub struct AssignmentPlanDocument {
     pub assignment_plan: SpeakerAssignmentPlan,
     pub published_at: String,
     pub status: PublishedAssignmentStatus,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reads_legacy_assignment_plan_counts_as_student_counts() {
+        let plan = serde_json::from_value::<SpeakerAssignmentPlan>(serde_json::json!({
+            "assignments": [],
+            "assignedCount": 1,
+            "generatedAt": "2026-07-10T00:00:00Z",
+            "sessionCapacity": 12,
+            "sessionLoads": [{
+                "count": 1,
+                "sessionIndex": 1,
+                "sessionLabel": "第 1 場",
+                "speakerName": "講者"
+            }],
+            "sessionsPerSpeaker": 2,
+            "speakerLoads": [{
+                "speakerName": "講者",
+                "count": 1
+            }],
+            "totalCapacity": 48,
+            "unassignedCount": 0
+        }))
+        .unwrap();
+
+        assert_eq!(plan.assigned_student_count, 1);
+        assert_eq!(plan.assigned_counselor_count, 0);
+        assert_eq!(plan.student_capacity, 48);
+        assert_eq!(plan.session_loads[0].student_count, 1);
+        assert_eq!(plan.session_loads[0].counselor_count, 0);
+    }
 }

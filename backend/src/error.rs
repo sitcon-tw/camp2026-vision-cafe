@@ -16,6 +16,8 @@ pub enum AppError {
     NotFound(String),
     #[error("{0}")]
     Unauthorized(String),
+    #[error("{0}")]
+    UnprocessableEntity(String),
     #[error("database error: {0}")]
     Database(#[from] mongodb::error::Error),
     #[error("http client error: {0}")]
@@ -41,6 +43,7 @@ impl IntoResponse for AppError {
             Self::Forbidden(_) => StatusCode::FORBIDDEN,
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::Unauthorized(_) => StatusCode::UNAUTHORIZED,
+            Self::UnprocessableEntity(_) => StatusCode::UNPROCESSABLE_ENTITY,
             Self::Database(_)
             | Self::Http(_)
             | Self::Jwt(_)
@@ -52,6 +55,7 @@ impl IntoResponse for AppError {
             | Self::Forbidden(message)
             | Self::NotFound(message)
             | Self::Unauthorized(message)
+            | Self::UnprocessableEntity(message)
             | Self::Internal(message) => message,
             Self::Database(_) | Self::Http(_) | Self::Jwt(_) | Self::Serde(_) => {
                 "Internal server error".to_string()

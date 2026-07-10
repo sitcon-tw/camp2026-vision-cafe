@@ -4,7 +4,11 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::{config::Config, error::AppError, types::AuthenticatedStudent};
+use crate::{
+    config::Config,
+    error::AppError,
+    types::{AuthenticatedStudent, ParticipantRole},
+};
 
 const ROSTER_RANGE: &str = "A1:Z500";
 const GOOGLE_TOKEN_URL: &str = "https://oauth2.googleapis.com/token";
@@ -71,20 +75,26 @@ pub fn parse_roster_students(rows: Vec<Vec<String>>) -> Vec<AuthenticatedStudent
             let student_id = read_column(row, &header, "token");
             let github_username = read_column(row, &header, "GitHub username");
             let telegram_group_url = read_column(row, &header, "Telegram 群組連結");
+            let google_account_email = read_column(row, &header, "google account mail");
 
-            if team_id.is_empty()
-                || student_id.is_empty()
-                || github_username.is_empty()
-                || telegram_group_url.is_empty()
-            {
+            if team_id.is_empty() || student_id.is_empty() || github_username.is_empty() {
                 return None;
             }
 
+            let participant_role = if !telegram_group_url.is_empty() {
+                ParticipantRole::Student
+            } else if !google_account_email.is_empty() {
+                ParticipantRole::Counselor
+            } else {
+                return None;
+            };
+
             Some(AuthenticatedStudent {
                 github_username,
+                participant_role,
                 student_id,
                 student_name: if student_name.is_empty() {
-                    "未命名學員".to_string()
+                    "未命名參與者".to_string()
                 } else {
                     student_name
                 },
@@ -210,6 +220,8 @@ struct GoogleSheetsValuesResponse {
 
 #[cfg(test)]
 mod tests {
+    use crate::types::ParticipantRole;
+
     use super::{normalize_github_username, parse_roster_students};
 
     #[test]
@@ -221,6 +233,7 @@ mod tests {
                 "token".to_string(),
                 "GitHub username".to_string(),
                 "Telegram 群組連結".to_string(),
+                "google account mail".to_string(),
             ],
             vec![
                 "1".to_string(),
@@ -228,6 +241,7 @@ mod tests {
                 "student-1".to_string(),
                 "Octocat".to_string(),
                 "https://t.me/+team1".to_string(),
+                "student-1@example.com".to_string(),
             ],
             vec![
                 "2".to_string(),
@@ -235,6 +249,7 @@ mod tests {
                 "student-2".to_string(),
                 String::new(),
                 "https://t.me/+team2".to_string(),
+                "student-2@example.com".to_string(),
             ],
             vec![
                 String::new(),
@@ -242,6 +257,7 @@ mod tests {
                 "student-3".to_string(),
                 "staff-user".to_string(),
                 "https://t.me/+team3".to_string(),
+                "staff@example.com".to_string(),
             ],
             vec![
                 "3".to_string(),
@@ -249,6 +265,7 @@ mod tests {
                 "student-4".to_string(),
                 "@Mona".to_string(),
                 "https://t.me/+team3".to_string(),
+                "student-4@example.com".to_string(),
             ],
             vec![
                 "4".to_string(),
@@ -256,11 +273,13 @@ mod tests {
                 "student-5".to_string(),
                 "no-telegram".to_string(),
                 String::new(),
+                String::new(),
             ],
         ]);
 
         assert_eq!(students.len(), 2);
         assert_eq!(students[0].github_username, "Octocat");
+        assert_eq!(students[0].participant_role, ParticipantRole::Student);
         assert_eq!(students[1].team_name, "第3組");
     }
 
@@ -271,6 +290,7 @@ mod tests {
                 "GitHub username".to_string(),
                 "token".to_string(),
                 "Telegram 群組連結".to_string(),
+                "google account mail".to_string(),
                 "學員姓名".to_string(),
                 "小隊".to_string(),
             ],
@@ -278,6 +298,7 @@ mod tests {
                 "octocat".to_string(),
                 "student-1".to_string(),
                 "https://t.me/+team5".to_string(),
+                "student-1@example.com".to_string(),
                 "小明".to_string(),
                 "5".to_string(),
             ],
@@ -285,6 +306,39 @@ mod tests {
 
         assert_eq!(students[0].team_name, "第5組");
         assert_eq!(students[0].student_id, "student-1");
+    }
+
+    #[test]
+    fn recognizes_counselors_and_ignores_incomplete_test_rows() {
+        let participants = parse_roster_students(vec![
+            vec![
+                "小隊".to_string(),
+                "學員姓名".to_string(),
+                "token".to_string(),
+                "GitHub username".to_string(),
+                "Telegram 群組連結".to_string(),
+                "google account mail".to_string(),
+            ],
+            vec![
+                "1".to_string(),
+                "隊輔".to_string(),
+                "counselor-1".to_string(),
+                "counselor-github".to_string(),
+                String::new(),
+                "counselor@example.com".to_string(),
+            ],
+            vec![
+                "10".to_string(),
+                "隊輔測試用".to_string(),
+                "test-counselor".to_string(),
+                "test-github".to_string(),
+                String::new(),
+                String::new(),
+            ],
+        ]);
+
+        assert_eq!(participants.len(), 1);
+        assert_eq!(participants[0].participant_role, ParticipantRole::Counselor);
     }
 
     #[test]

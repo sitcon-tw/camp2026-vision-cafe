@@ -1,5 +1,6 @@
 import type {
   AdminFlowControls,
+  ParticipantRole,
   SpeakerAssignmentPlan,
   SpeakerSessionAssignments,
   StudentSpeakerPreference,
@@ -7,6 +8,7 @@ import type {
 } from "@/lib/vision-cafe"
 
 export type AuthenticatedStudent = {
+  participantRole: ParticipantRole
   studentId: string
   studentName: string
   teamId: string

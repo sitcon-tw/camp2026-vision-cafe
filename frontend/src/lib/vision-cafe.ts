@@ -1,6 +1,9 @@
 import speakerConfig from "@shared/speakers.json"
 
+export type ParticipantRole = "student" | "counselor"
+
 export type SpeakerAssignment = {
+  participantRole: ParticipantRole
   sessionIndex: number | null
   sessionLabel: string | null
   status: SpeakerAssignmentStatus
@@ -16,6 +19,7 @@ export type AdminFlowControls = {
 }
 
 export type StudentSpeakerPreference = {
+  participantRole: ParticipantRole
   studentId: string
   studentName: string
   teamName: string
@@ -34,17 +38,20 @@ export type SpeakerAssignmentStatus = "assigned" | "unassigned"
 
 export type SpeakerAssignmentPlan = {
   assignments: PlannedSpeakerAssignment[]
-  assignedCount: number
+  assignedStudentCount: number
+  assignedCounselorCount: number
   generatedAt: string
   sessionCapacity: number
   sessionLoads: SpeakerSessionLoad[]
   sessionsPerSpeaker: number
   speakerLoads: {
     speakerName: string
-    count: number
+    studentCount: number
+    counselorCount: number
   }[]
-  totalCapacity: number
-  unassignedCount: number
+  studentCapacity: number
+  unassignedStudentCount: number
+  unassignedCounselorCount: number
 }
 
 export type AssignmentGroup<TAssignment> = {
@@ -60,7 +67,8 @@ export type SpeakerSessionAssignments<TAssignment = SpeakerAssignment> =
   }
 
 export type SpeakerSessionLoad = {
-  count: number
+  studentCount: number
+  counselorCount: number
   sessionIndex: number
   sessionLabel: string
   speakerName: string
@@ -107,6 +115,7 @@ export function toSpeakerAssignment(
   assignment: PlannedSpeakerAssignment,
 ): SpeakerAssignment {
   return {
+    participantRole: assignment.participantRole,
     sessionIndex: assignment.sessionIndex ?? null,
     sessionLabel: assignment.sessionLabel ?? null,
     speakerName: assignment.speakerName ?? null,
@@ -192,7 +201,8 @@ export function groupAssignmentsBySession<
       sessions.get(sessionKey) ??
       ({
         assignments: [],
-        count: 0,
+        studentCount: 0,
+        counselorCount: 0,
         sessionIndex: assignment.sessionIndex,
         sessionLabel:
           assignment.sessionLabel ??
@@ -201,7 +211,6 @@ export function groupAssignmentsBySession<
       } satisfies SpeakerSessionAssignments<TAssignment>)
 
     session.assignments.push(assignment)
-    session.count = Math.max(session.count, session.assignments.length)
     sessions.set(sessionKey, session)
   }
 

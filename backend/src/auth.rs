@@ -8,7 +8,7 @@ use subtle::ConstantTimeEq;
 use crate::{
     config::Config,
     error::AppError,
-    types::{AuthenticatedStudent, OkPayload},
+    types::{AuthenticatedStudent, OkPayload, ParticipantRole},
 };
 
 type HmacSha256 = Hmac<Sha256>;
@@ -39,6 +39,8 @@ pub struct StudentSessionPayload {
     team_id: String,
     team_name: String,
     github_username: String,
+    #[serde(default)]
+    participant_role: ParticipantRole,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -102,6 +104,7 @@ pub fn student_from_session(
 
     Ok(AuthenticatedStudent {
         github_username: payload.github_username,
+        participant_role: payload.participant_role,
         student_id: payload.student_id,
         student_name: payload.student_name,
         team_id: payload.team_id,
@@ -145,6 +148,7 @@ pub fn student_session_cookie(
             exp: now + STUDENT_SESSION_MAX_AGE_SECONDS,
             github_username: student.github_username.clone(),
             iat: now,
+            participant_role: student.participant_role.clone(),
             student_id: student.student_id.clone(),
             student_name: student.student_name.clone(),
             sub: "student".to_string(),
@@ -285,6 +289,7 @@ mod tests {
         let config = test_config();
         let student = AuthenticatedStudent {
             github_username: "octocat".to_string(),
+            participant_role: ParticipantRole::Counselor,
             student_id: "student-1".to_string(),
             student_name: "小明".to_string(),
             team_id: "1".to_string(),
@@ -308,10 +313,7 @@ mod tests {
             HeaderValue::from_str(&format!("{STUDENT_SESSION_COOKIE}={token}")).unwrap(),
         );
 
-        assert_eq!(
-            student_from_session(&headers, &config).unwrap().student_id,
-            "student-1"
-        );
+        assert_eq!(student_from_session(&headers, &config).unwrap(), student);
     }
 
     #[test]
@@ -321,6 +323,23 @@ mod tests {
         headers.insert(header::ORIGIN, HeaderValue::from_static("http://evil.test"));
 
         assert!(require_same_origin(&headers, &config).is_err());
+    }
+
+    #[test]
+    fn defaults_legacy_student_sessions_to_student_role() {
+        let payload = serde_json::from_value::<StudentSessionPayload>(serde_json::json!({
+            "exp": 2,
+            "iat": 1,
+            "sub": "student",
+            "studentId": "student-1",
+            "studentName": "小明",
+            "teamId": "1",
+            "teamName": "第1組",
+            "githubUsername": "octocat"
+        }))
+        .unwrap();
+
+        assert_eq!(payload.participant_role, ParticipantRole::Student);
     }
 
     fn test_config() -> Config {

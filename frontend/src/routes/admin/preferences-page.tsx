@@ -7,6 +7,7 @@ import {
   type StudentSpeakerPreference,
 } from "@/lib/vision-cafe"
 import { Badge } from "@/components/ui/badge"
+import { ParticipantRoleBadge } from "@/components/participant-role-badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -76,7 +77,7 @@ export default function AdminPreferencesPage() {
       const response = await fetchAdmin("/api/admin/preferences")
 
       if (!response.ok) {
-        setError("無法載入學員志願。")
+        setError("無法載入參與者志願。")
         setLoading(false)
         return
       }
@@ -130,13 +131,13 @@ export default function AdminPreferencesPage() {
             志願控制
           </Badge>
           <CardTitle className="text-2xl font-black tracking-tight">
-            學員志願序
+            參與者志願序
           </CardTitle>
           <CardDescription className="text-base leading-7">
-            查看、搜尋並修改每位學員的志願序與送出時間。分配優先序以送出時間為準，未送出者排最後。
+            查看、搜尋並修改每位參與者的志願序與送出時間。分配優先序以送出時間為準，未送出者排最後。
           </CardDescription>
           <CardAction>
-            <Badge variant="secondary">{preferences.length} 位學員</Badge>
+            <Badge variant="secondary">{preferences.length} 位參與者</Badge>
           </CardAction>
         </CardHeader>
         <CardContent className="flex min-h-0 flex-col gap-4 overflow-hidden">
@@ -148,7 +149,7 @@ export default function AdminPreferencesPage() {
             <Input
               value={query}
               placeholder="搜尋姓名、組別、講者"
-              aria-label="搜尋學員志願"
+              aria-label="搜尋參與者志願"
               className="pl-9"
               onChange={(event) => setQuery(event.target.value)}
             />
@@ -165,7 +166,7 @@ export default function AdminPreferencesPage() {
             <Table>
               <TableHeader className="sticky top-0 z-10">
                 <TableRow>
-                  <TableHead>學員</TableHead>
+                  <TableHead>參與者</TableHead>
                   <TableHead>志願序</TableHead>
                   <TableHead>送出時間</TableHead>
                   <TableHead className="text-right">操作</TableHead>
@@ -188,7 +189,7 @@ export default function AdminPreferencesPage() {
 
           {filteredPreferences.length === 0 ? (
             <p className="text-muted-foreground shrink-0 text-center text-sm font-semibold">
-              沒有符合搜尋條件的學員。
+              沒有符合搜尋條件的參與者。
             </p>
           ) : null}
           {error ? (
@@ -220,7 +221,10 @@ function PreferenceRow({
     <TableRow>
       <TableCell>
         <div className="flex flex-col gap-1">
-          <span className="font-black">{preference.studentName}</span>
+          <span className="flex flex-wrap items-center gap-2 font-black">
+            {preference.studentName}
+            <ParticipantRoleBadge role={preference.participantRole} />
+          </span>
           <span className="text-muted-foreground text-xs">
             {preference.studentId} / {preference.teamName}
           </span>

@@ -123,6 +123,7 @@ pub async fn save_student_preference(
     let document = PreferenceDocument {
         github_username: student.github_username.clone(),
         id: student.student_id.clone(),
+        participant_role: student.participant_role.clone(),
         preference_order,
         student_id: student.student_id.clone(),
         student_name: student.student_name.clone(),
@@ -143,9 +144,8 @@ pub async fn save_student_preference(
 pub async fn create_current_assignment_plan(
     state: &AppState,
 ) -> Result<SpeakerAssignmentPlan, AppError> {
-    Ok(create_speaker_assignment_plan(
-        get_admin_preferences(state).await?,
-    ))
+    create_speaker_assignment_plan(get_admin_preferences(state).await?)
+        .map_err(|error| AppError::UnprocessableEntity(error.to_string()))
 }
 
 pub async fn publish_current_assignment_plan(
@@ -227,6 +227,7 @@ fn to_student_preference(
     let submitted_at = document.and_then(|document| document.submitted_at.clone());
 
     StudentSpeakerPreference {
+        participant_role: student.participant_role.clone(),
         preference_order: if submitted_at.is_some() {
             document
                 .map(|document| document.preference_order.clone())

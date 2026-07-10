@@ -17,6 +17,7 @@ import {
 import type {
   AdminAssignmentPlanPayload,
   AdminPublishedAssignmentPlansPayload,
+  ApiErrorPayload,
   PublishedAssignmentPlan,
 } from "@/lib/vision-cafe-api"
 import type { SpeakerAssignmentPlan } from "@/lib/vision-cafe"
@@ -53,6 +54,15 @@ async function fetchPublishedAssignmentPlans() {
     (await response.json()) as AdminPublishedAssignmentPlansPayload
 
   return payload.assignmentPlans
+}
+
+async function assignmentErrorMessage(response: Response, fallback: string) {
+  try {
+    const payload = (await response.json()) as ApiErrorPayload
+    return payload.error || fallback
+  } catch {
+    return fallback
+  }
 }
 
 export default function AdminAssignmentsPage() {
@@ -153,7 +163,7 @@ export default function AdminAssignmentsPage() {
     })
 
     if (!response.ok) {
-      setError("Dry run 產生失敗。")
+      setError(await assignmentErrorMessage(response, "Dry run 產生失敗。"))
       setGenerating(false)
       return
     }
@@ -173,7 +183,7 @@ export default function AdminAssignmentsPage() {
     })
 
     if (!response.ok) {
-      setError("正式分配發布失敗。")
+      setError(await assignmentErrorMessage(response, "正式分配發布失敗。"))
       setPublishing(false)
       return
     }
@@ -202,7 +212,7 @@ export default function AdminAssignmentsPage() {
             </CardTitle>
             <CardDescription className="text-base leading-7">
               依送出時間、講者志願與場次容量產生分配結果。每位講者 2
-              個場次，每場 12 位學員。
+              個場次，每場 12 位學員，隊輔另計且同隊兩位分居不同場次。
             </CardDescription>
             <CardAction className="col-start-1 row-span-1 row-start-auto justify-self-start sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:justify-self-end">
               <div className="flex flex-wrap justify-start gap-2 sm:justify-end">
@@ -360,11 +370,14 @@ function PublishedAssignmentPlansPanel({
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-xl font-black">
-                {activeAssignmentPlan.assignedCount} /{" "}
-                {activeAssignmentPlan.totalCapacity} 已分配
+                {activeAssignmentPlan.assignedStudentCount} /{" "}
+                {activeAssignmentPlan.studentCapacity} 位學員、
+                {activeAssignmentPlan.assignedCounselorCount} 位隊輔已分配
               </p>
               <p className="text-muted-foreground text-sm font-semibold">
-                {activeAssignmentPlan.unassignedCount} 未分配，產生於{" "}
+                {activeAssignmentPlan.unassignedStudentCount +
+                  activeAssignmentPlan.unassignedCounselorCount}{" "}
+                未分配，產生於{" "}
                 {formatSubmittedAt(activeAssignmentPlan.generatedAt)}
               </p>
             </div>
@@ -428,8 +441,11 @@ function PublishedAssignmentPlanButton({
         {assignmentPlan.isActive ? <Badge>Active</Badge> : null}
       </span>
       <span className="text-muted-foreground text-xs font-semibold">
-        {assignmentPlan.assignedCount} / {assignmentPlan.totalCapacity} 已分配 ·{" "}
-        {assignmentPlan.unassignedCount} 未分配
+        {assignmentPlan.assignedStudentCount} / {assignmentPlan.studentCapacity}{" "}
+        位學員、{assignmentPlan.assignedCounselorCount} 位隊輔已分配 ·{" "}
+        {assignmentPlan.unassignedStudentCount +
+          assignmentPlan.unassignedCounselorCount}{" "}
+        未分配
       </span>
       <span className="text-muted-foreground text-xs font-semibold">
         產生於 {formatSubmittedAt(assignmentPlan.generatedAt)}

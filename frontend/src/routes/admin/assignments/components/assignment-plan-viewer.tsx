@@ -14,6 +14,7 @@ import {
   groupAssignmentsByTeam,
 } from "@/lib/vision-cafe"
 import { Badge } from "@/components/ui/badge"
+import { ParticipantRoleBadge } from "@/components/participant-role-badge"
 import {
   Table,
   TableBody,
@@ -33,6 +34,10 @@ type AssignmentPlanViewerProps = {
 export function AssignmentPlanViewer({
   assignmentPlan,
 }: AssignmentPlanViewerProps) {
+  const unassignedCount =
+    assignmentPlan.unassignedStudentCount +
+    assignmentPlan.unassignedCounselorCount
+
   return (
     <Tabs
       defaultValue="overview"
@@ -45,19 +50,19 @@ export function AssignmentPlanViewer({
         </Badge>
         <Badge variant="outline">
           <UsersIcon aria-hidden="true" data-icon="inline-start" />
-          {assignmentPlan.assignedCount} / {assignmentPlan.totalCapacity} 已分配
+          {assignmentPlan.assignedStudentCount} /{" "}
+          {assignmentPlan.studentCapacity} 位學員
         </Badge>
-        <Badge
-          variant={
-            assignmentPlan.unassignedCount > 0 ? "destructive" : "outline"
-          }
-        >
-          {assignmentPlan.unassignedCount > 0 ? (
+        <Badge variant="outline">
+          {assignmentPlan.assignedCounselorCount} 位隊輔
+        </Badge>
+        <Badge variant={unassignedCount > 0 ? "destructive" : "outline"}>
+          {unassignedCount > 0 ? (
             <AlertTriangleIcon aria-hidden="true" data-icon="inline-start" />
           ) : (
             <CheckCircle2Icon aria-hidden="true" data-icon="inline-start" />
           )}
-          {assignmentPlan.unassignedCount} 未分配
+          {unassignedCount} 未分配
         </Badge>
       </div>
 
@@ -65,7 +70,7 @@ export function AssignmentPlanViewer({
         <TabsTrigger value="overview">總覽</TabsTrigger>
         <TabsTrigger value="sessions">場次視圖</TabsTrigger>
         <TabsTrigger value="teams">小隊視圖</TabsTrigger>
-        <TabsTrigger value="students">學員清單</TabsTrigger>
+        <TabsTrigger value="students">參與者清單</TabsTrigger>
       </TabsList>
 
       <div className="min-h-0 flex-1 overflow-hidden">
@@ -107,17 +112,16 @@ function AssignmentOverview({ assignmentPlan }: AssignmentOverviewProps) {
     <div className="flex min-w-0 flex-col gap-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatusTile
-          label="總容量"
-          value={`${assignmentPlan.totalCapacity} 位`}
+          label="學員總容量"
+          value={`${assignmentPlan.studentCapacity} 位`}
         />
         <StatusTile
-          label="已分配"
-          value={`${assignmentPlan.assignedCount} 位`}
+          label="已分配學員"
+          value={`${assignmentPlan.assignedStudentCount} 位`}
         />
         <StatusTile
-          label="未分配"
-          value={`${assignmentPlan.unassignedCount} 位`}
-          tone={assignmentPlan.unassignedCount > 0 ? "destructive" : "default"}
+          label="已分配隊輔"
+          value={`${assignmentPlan.assignedCounselorCount} 位`}
         />
         <StatusTile
           label="場次容量"
@@ -128,7 +132,8 @@ function AssignmentOverview({ assignmentPlan }: AssignmentOverviewProps) {
       <div className="flex flex-wrap gap-2">
         {assignmentPlan.speakerLoads.map((load) => (
           <Badge key={load.speakerName} variant="outline">
-            {load.speakerName}: {load.count} 位
+            {load.speakerName}: {load.studentCount} 位學員＋
+            {load.counselorCount} 位隊輔
           </Badge>
         ))}
       </div>
@@ -150,11 +155,12 @@ function AssignmentOverview({ assignmentPlan }: AssignmentOverviewProps) {
               <TableCell>{sessionLoad.speakerName}</TableCell>
               <TableCell>{sessionLoad.sessionLabel}</TableCell>
               <TableCell>
-                {sessionLoad.count} / {assignmentPlan.sessionCapacity}
+                {sessionLoad.studentCount} / {assignmentPlan.sessionCapacity}{" "}
+                位學員＋{sessionLoad.counselorCount} 位隊輔
               </TableCell>
               <TableCell>
                 <CapacityBadge
-                  count={sessionLoad.count}
+                  count={sessionLoad.studentCount}
                   capacity={assignmentPlan.sessionCapacity}
                 />
               </TableCell>
@@ -163,10 +169,12 @@ function AssignmentOverview({ assignmentPlan }: AssignmentOverviewProps) {
         </TableBody>
       </Table>
 
-      {assignmentPlan.unassignedCount > 0 ? (
+      {assignmentPlan.unassignedStudentCount > 0 ||
+      assignmentPlan.unassignedCounselorCount > 0 ? (
         <p className="text-destructive text-sm font-semibold">
-          有 {assignmentPlan.unassignedCount}{" "}
-          位學員未分配，請檢查總容量或志願資料。
+          有 {assignmentPlan.unassignedStudentCount} 位學員、
+          {assignmentPlan.unassignedCounselorCount}{" "}
+          位隊輔未分配，請檢查容量或名單資料。
         </p>
       ) : null}
     </div>
@@ -221,11 +229,12 @@ function SessionView({ assignmentPlan }: SessionViewProps) {
                 {session.speakerName} / {session.sessionLabel}
               </h3>
               <p className="text-muted-foreground text-sm font-semibold">
-                {session.count} / {assignmentPlan.sessionCapacity} 位學員
+                {session.studentCount} / {assignmentPlan.sessionCapacity}{" "}
+                位學員＋{session.counselorCount} 位隊輔
               </p>
             </div>
             <CapacityBadge
-              count={session.count}
+              count={session.studentCount}
               capacity={assignmentPlan.sessionCapacity}
             />
           </div>
@@ -252,7 +261,7 @@ function TeamView({ assignments }: TeamViewProps) {
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-lg font-black">{team.teamName}</h3>
-            <Badge variant="outline">{team.assignments.length} 位學員</Badge>
+            <ParticipantCounts assignments={team.assignments} />
           </div>
           <AssignmentMiniTable assignments={team.assignments} />
         </div>
@@ -268,7 +277,9 @@ type AssignmentMiniTableProps = {
 function AssignmentMiniTable({ assignments }: AssignmentMiniTableProps) {
   if (!assignments.length) {
     return (
-      <p className="text-muted-foreground text-sm font-semibold">尚無學員。</p>
+      <p className="text-muted-foreground text-sm font-semibold">
+        尚無參與者。
+      </p>
     )
   }
 
@@ -276,7 +287,7 @@ function AssignmentMiniTable({ assignments }: AssignmentMiniTableProps) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>學員</TableHead>
+          <TableHead>參與者</TableHead>
           <TableHead>小隊</TableHead>
           <TableHead>講者 / 場次</TableHead>
           <TableHead>志願</TableHead>
@@ -286,7 +297,12 @@ function AssignmentMiniTable({ assignments }: AssignmentMiniTableProps) {
       <TableBody>
         {assignments.map((assignment) => (
           <TableRow key={assignment.studentId}>
-            <TableCell>{assignment.studentName}</TableCell>
+            <TableCell>
+              <div className="flex flex-wrap items-center gap-2">
+                {assignment.studentName}
+                <ParticipantRoleBadge role={assignment.participantRole} />
+              </div>
+            </TableCell>
             <TableCell>{assignment.teamName}</TableCell>
             <TableCell>
               <AssignmentTarget assignment={assignment} />
@@ -311,7 +327,7 @@ function StudentAssignmentTable({ assignments }: StudentAssignmentTableProps) {
     <Table>
       <TableHeader className="sticky top-0 z-10">
         <TableRow>
-          <TableHead>學員</TableHead>
+          <TableHead>參與者</TableHead>
           <TableHead>講者 / 場次</TableHead>
           <TableHead>命中志願</TableHead>
           <TableHead>送出時間</TableHead>
@@ -324,7 +340,10 @@ function StudentAssignmentTable({ assignments }: StudentAssignmentTableProps) {
           <TableRow key={assignment.studentId}>
             <TableCell>
               <div className="flex flex-col gap-1">
-                <span className="font-black">{assignment.studentName}</span>
+                <span className="flex flex-wrap items-center gap-2 font-black">
+                  {assignment.studentName}
+                  <ParticipantRoleBadge role={assignment.participantRole} />
+                </span>
                 <span className="text-muted-foreground text-xs">
                   {assignment.studentId} / {assignment.teamName}
                 </span>
@@ -345,6 +364,23 @@ function StudentAssignmentTable({ assignments }: StudentAssignmentTableProps) {
         ))}
       </TableBody>
     </Table>
+  )
+}
+
+function ParticipantCounts({
+  assignments,
+}: {
+  assignments: PlannedSpeakerAssignment[]
+}) {
+  const studentCount = assignments.filter(
+    (assignment) => assignment.participantRole === "student",
+  ).length
+  const counselorCount = assignments.length - studentCount
+
+  return (
+    <Badge variant="outline">
+      {studentCount} 位學員＋{counselorCount} 位隊輔
+    </Badge>
   )
 }
 
