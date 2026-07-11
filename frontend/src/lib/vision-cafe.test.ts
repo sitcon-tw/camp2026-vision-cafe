@@ -11,7 +11,7 @@ import {
 
 describe("vision cafe shared frontend data", () => {
   it("loads speaker names and session constants from the shared config", () => {
-    expect(getSpeakerCandidateNames()).toEqual(["林予安", "陳以晨"])
+    expect(getSpeakerCandidateNames()).toEqual(["蘇柏瑄 Brian Su", "趙式隆"])
     expect(SPEAKER_SESSION_COUNT).toBe(2)
     expect(SPEAKER_SESSION_CAPACITY).toBe(12)
   })

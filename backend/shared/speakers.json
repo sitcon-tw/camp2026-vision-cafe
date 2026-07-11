@@ -3,34 +3,14 @@
   "sessionCount": 2,
   "speakers": [
     {
-      "speakerName": "林予安",
-      "avatar": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='48' fill='%23F4C84A'/%3E%3Ccircle cx='34' cy='39' r='7' fill='%2317233A'/%3E%3Ccircle cx='62' cy='39' r='7' fill='%2317233A'/%3E%3Cpath d='M31 62c8 8 26 8 34 0' fill='none' stroke='%2317233A' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E",
-      "description": "專注於產品策略與跨域協作，擅長把模糊的使用者洞察整理成可執行的專案方向。",
-      "links": [
-        {
-          "label": "產品策略文章",
-          "href": "https://medium.com/tag/product-strategy"
-        },
-        {
-          "label": "使用者洞察方法",
-          "href": "https://www.nngroup.com/articles/user-research-methods/"
-        }
-      ]
+      "speakerName": "蘇柏瑄 Brian Su",
+      "avatar": "https://sitcon.camp/2026/avatars/speakers/brian-su.jpg",
+      "description": "台大資訊系畢業，現於香港擔任軟體工程師。小學四年級起接觸到程式，除了寫過各種 hobby project 以外，還參加過世界機器人奧林匹克、國際科展、國際資奧、與國際大學生程式設計競賽等大大小小的比賽——其中曾以台灣歷史最佳名次取得國際資奧金牌。也參與過多次 SITCON 活動並曾任年會議程組副組長。大學時誤打誤撞的進入了間金融公司實習，現在是個全職的軟體工程師，主要投入在開發簡潔與可維護的程式。"
     },
     {
-      "speakerName": "陳以晨",
-      "avatar": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='48' fill='%2331A886'/%3E%3Ccircle cx='35' cy='40' r='7' fill='%23FFF8E9'/%3E%3Ccircle cx='61' cy='40' r='7' fill='%23FFF8E9'/%3E%3Cpath d='M29 64c10 6 28 6 38 0' fill='none' stroke='%23FFF8E9' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E",
-      "description": "長期帶領工程與設計團隊打造學習型產品，重視快速驗證、清楚溝通與團隊節奏。",
-      "links": [
-        {
-          "label": "學習型產品案例",
-          "href": "https://www.edutopia.org/topic/project-based-learning"
-        },
-        {
-          "label": "快速驗證與產品實驗",
-          "href": "https://www.strategyzer.com/library/testing-business-ideas"
-        }
-      ]
+      "speakerName": "趙式隆",
+      "avatar": "https://sitcon.camp/2026/avatars/speakers/shih-lung-chao.webp",
+      "description": "趙式隆先生為現任北市府資訊局局長，作為資料科學家與行動主義者，他致力於推動開放原始碼，打造臺北成為數位世界中的自由、平等與博愛之城。作為連續創業者，他前後創辦了教育科技平台 Zuvio\n與保險科技龍頭 BravoAI。作為學者，他是臺大創創的共同創辦人，現仍兼任該學程副教授，並曾任教於臺大電機系與陽明交大經管所。"
     }
   ]
 }
