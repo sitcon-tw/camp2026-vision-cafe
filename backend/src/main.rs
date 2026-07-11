@@ -70,7 +70,10 @@ fn router(state: AppState) -> Router {
             "/admin/flow-controls",
             get(api::admin_flow_controls).put(api::update_admin_flow_controls),
         )
-        .route("/admin/preferences", get(api::admin_preferences))
+        .route(
+            "/admin/preferences",
+            get(api::admin_preferences).delete(api::clear_admin_preferences),
+        )
         .route(
             "/admin/preferences/{student_id}",
             put(api::update_admin_preference),

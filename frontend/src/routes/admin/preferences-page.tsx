@@ -1,4 +1,9 @@
-import { PencilIcon, SearchIcon, SlidersHorizontalIcon } from "lucide-react"
+import {
+  PencilIcon,
+  SearchIcon,
+  SlidersHorizontalIcon,
+  Trash2Icon,
+} from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
 import type { AdminPreferencesPayload } from "@/lib/vision-cafe-api"
@@ -9,6 +14,17 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { ParticipantRoleBadge } from "@/components/participant-role-badge"
 import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import {
   Card,
   CardAction,
@@ -53,6 +69,7 @@ export default function AdminPreferencesPage() {
   const [query, setQuery] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [clearing, setClearing] = useState(false)
   const speakerNames = getSpeakerCandidateNames()
   const normalizedQuery = query.trim().toLowerCase()
   const filteredPreferences = useMemo(
@@ -119,6 +136,24 @@ export default function AdminPreferencesPage() {
     }
   }
 
+  async function clearAllPreferences() {
+    setClearing(true)
+    setError(null)
+
+    const response = await fetchAdmin("/api/admin/preferences", {
+      method: "DELETE",
+    })
+
+    if (!response.ok) {
+      setError("清除所有志願失敗。")
+      setClearing(false)
+      return
+    }
+
+    setPreferences((current) => clearLocalPreferences(current))
+    setClearing(false)
+  }
+
   return (
     <AdminSectionPage title="志願控制">
       <Card className="max-h-[calc(100svh-10rem)] overflow-hidden">
@@ -136,8 +171,42 @@ export default function AdminPreferencesPage() {
           <CardDescription className="text-base leading-7">
             查看、搜尋並修改每位參與者的志願序與送出時間。分配優先序以送出時間為準，未送出者排最後。
           </CardDescription>
-          <CardAction>
+          <CardAction className="flex items-center gap-2">
             <Badge variant="secondary">{preferences.length} 位參與者</Badge>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="destructive"
+                  disabled={loading || clearing}
+                >
+                  {clearing ? (
+                    <Spinner aria-hidden="true" />
+                  ) : (
+                    <Trash2Icon aria-hidden="true" data-icon="inline-start" />
+                  )}
+                  清除所有志願
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>確定要清除所有人的志願？</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    所有參與者的志願序與送出時間都會被清除，且無法復原。
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>取消</AlertDialogCancel>
+                  <AlertDialogAction
+                    variant="destructive"
+                    onClick={() => void clearAllPreferences()}
+                  >
+                    確定清除
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardAction>
         </CardHeader>
         <CardContent className="flex min-h-0 flex-col gap-4 overflow-hidden">
@@ -406,4 +475,12 @@ function updateLocalPreference(
       ? { ...preference, ...updates }
       : preference,
   )
+}
+
+function clearLocalPreferences(preferences: StudentSpeakerPreference[]) {
+  return preferences.map((preference) => ({
+    ...preference,
+    preferenceOrder: [],
+    submittedAt: null,
+  }))
 }

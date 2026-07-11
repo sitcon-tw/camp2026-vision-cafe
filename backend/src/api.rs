@@ -12,10 +12,10 @@ use crate::{
     },
     error::AppError,
     repository::{
-        create_current_assignment_plan, get_admin_preferences, get_flow_controls,
-        get_lookup_payload, get_published_assignment_plans, get_student_preference,
-        get_student_selection_payload, publish_current_assignment_plan, save_student_preference,
-        update_flow_controls,
+        clear_all_student_preferences, create_current_assignment_plan, get_admin_preferences,
+        get_flow_controls, get_lookup_payload, get_published_assignment_plans,
+        get_student_preference, get_student_selection_payload, publish_current_assignment_plan,
+        save_student_preference, update_flow_controls,
     },
     roster::find_roster_student_by_id,
     state::AppState,
@@ -139,6 +139,17 @@ pub async fn admin_preferences(
     Ok(Json(AdminPreferencesPayload {
         preferences: get_admin_preferences(&state).await?,
     }))
+}
+
+pub async fn clear_admin_preferences(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    method: Method,
+) -> Result<Json<OkPayload>, AppError> {
+    require_admin_session(&method, &headers, &state.config)?;
+    clear_all_student_preferences(&state).await?;
+
+    Ok(Json(OkPayload { ok: true }))
 }
 
 pub async fn update_admin_preference(

@@ -141,6 +141,12 @@ pub async fn save_student_preference(
     Ok(())
 }
 
+pub async fn clear_all_student_preferences(state: &AppState) -> Result<(), AppError> {
+    preferences_collection(state).delete_many(doc! {}).await?;
+
+    Ok(())
+}
+
 pub async fn create_current_assignment_plan(
     state: &AppState,
 ) -> Result<SpeakerAssignmentPlan, AppError> {
